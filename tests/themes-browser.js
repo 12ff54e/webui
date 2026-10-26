@@ -1,4 +1,4 @@
-import {createTheme, themeToggle, palette, onThemeChange} from '../src/theme.js';
+import {createTheme, themeToggle, themePicker, palette, onThemeChange} from '../src/theme.js';
 
 export async function test_themes({test, assert, equal, root}) {
     const theme_root = (parent = root) => {
@@ -163,6 +163,203 @@ export async function test_themes({test, assert, equal, root}) {
             equal(element.getAttribute('aria-pressed'), 'false', 'Destroyed switch unsubscribes');
             element.click(); equal(theme.mode, 'dark', 'Destroyed switch removes its click listener');
         } finally { toggle.destroy(); theme.destroy(); node.remove(); }
+    });
+
+    await test('The theme picker exposes named radio choices and CSS-derived swatches in both modes', () => {
+        const node = theme_root(), theme = createTheme({root: node});
+        const picker = themePicker({theme, id: 'test-theme-picker'}).mount(node);
+        const expected = [{id: 'default', name: 'Celadon'}, ...named_themes];
+        try {
+            equal(theme.root, node); rejects(() => { theme.root = root; });
+            equal(picker.trigger.id, 'test-theme-picker'); equal(picker.trigger.type, 'button');
+            equal(picker.trigger.getAttribute('aria-label'), 'Color theme');
+            equal(picker.trigger.getAttribute('aria-haspopup'), 'menu');
+            equal(picker.trigger.getAttribute('aria-controls'), picker.menu.id);
+            equal(picker.trigger.getAttribute('aria-expanded'), 'false');
+            equal(picker.menu.getAttribute('role'), 'menu'); assert(picker.menu.hidden);
+            assert(picker.trigger.querySelector('svg')?.getAttribute('aria-hidden') === 'true');
+            assert(Object.isFrozen(picker.buttons)); equal(picker.buttons.length, expected.length);
+            for (const mode of ['light', 'dark']) {
+                theme.setMode(mode, {persist: false});
+                for (const [index, choice] of picker.buttons.entries()) {
+                    const entry = expected[index], swatch = choice.querySelector('.wui-theme-swatch');
+                    equal(choice.value, entry.id); equal(choice.type, 'button');
+                    equal(choice.getAttribute('role'), 'menuitemradio');
+                    equal(choice.getAttribute('aria-label'), entry.name);
+                    equal(choice.querySelector('.wui-theme-choice-label')?.textContent, entry.name);
+                    equal(choice.getAttribute('aria-checked'), String(entry.id === theme.name));
+                    assert(swatch && swatch.getAttribute('aria-hidden') === 'true');
+                    equal(swatch.dataset.theme, entry.id); equal(swatch.dataset.mode, mode);
+                    const reference = theme_root();
+                    reference.dataset.theme = entry.id; reference.dataset.mode = mode;
+                    const color = document.createElement('span');
+                    color.style.color = palette(reference).accent; reference.append(color);
+                    try {
+                        equal(getComputedStyle(swatch).backgroundColor, getComputedStyle(color).color,
+                            `${entry.name} swatch follows its ${mode} CSS accent`);
+                    } finally { reference.remove(); }
+                }
+                equal(node.dataset.theme, 'default', 'Rendering other swatches does not change the selected theme');
+                equal(node.dataset.mode, mode);
+            }
+        } finally { picker.destroy(); theme.destroy(); node.remove(); }
+    });
+
+    await test('Picker selections preserve mode and preference while synchronizing other pickers once', () => {
+        const key = `webui.test.picker.${crypto.randomUUID()}`, node = theme_root();
+        localStorage.setItem(key, 'light');
+        const theme = createTheme({root: node, storageKey: key});
+        theme.setMode('dark', {persist: false});
+        const form = document.createElement('form'); node.append(form);
+        let submissions = 0, notifications = 0;
+        form.addEventListener('submit', event => { event.preventDefault(); ++submissions; });
+        node.addEventListener('webui-theme-change', () => ++notifications);
+        const changes = [], other_changes = [];
+        const first = themePicker({theme, onChange: (value, event) => changes.push({value, event})}).mount(form);
+        const second = themePicker({theme, onChange: value => other_changes.push(value)}).mount(node);
+        const selected = picker => picker.buttons.find(button => button.getAttribute('aria-checked') === 'true')?.value;
+        try {
+            assert(first.menu.id && second.menu.id && first.menu.id !== second.menu.id);
+            equal(first.open(), first); assert(first.isOpen);
+            first.buttons.find(button => button.value === 'cloisonne').click();
+            equal(theme.name, 'cloisonne'); equal(theme.mode, 'dark');
+            equal(localStorage.getItem(key), 'light'); equal(notifications, 1);
+            equal(changes.length, 1); equal(changes[0].value, 'cloisonne'); assert(changes[0].event instanceof Event);
+            equal(other_changes.length, 0, 'A synchronized picker does not emit a user callback');
+            equal(selected(first), 'cloisonne'); equal(selected(second), 'cloisonne');
+            equal(first.isOpen, false); equal(document.activeElement, first.trigger); equal(submissions, 0);
+            first.open(); first.buttons.find(button => button.value === 'cloisonne').click();
+            equal(notifications, 1); equal(changes.length, 1, 'Selecting the current identity closes without a change');
+            second.open(); const focused = document.activeElement;
+            theme.setTheme('sorghum');
+            equal(selected(first), 'sorghum'); equal(selected(second), 'sorghum');
+            equal(document.activeElement, focused, 'Programmatic updates do not move menu focus');
+            equal(notifications, 2); equal(changes.length, 1); equal(other_changes.length, 0);
+            equal(theme.mode, 'dark'); equal(localStorage.getItem(key), 'light');
+            const replacement = [];
+            first.set({onChange: value => replacement.push(value)}).open();
+            first.buttons.find(button => button.value === 'gromwell').click();
+            equal(replacement.join(','), 'gromwell'); equal(changes.length, 1); equal(notifications, 3);
+            equal(selected(second), 'gromwell'); equal(submissions, 0);
+        } finally { first.destroy(); second.destroy(); theme.destroy(); node.remove(); localStorage.removeItem(key); }
+    });
+
+    for (const target of ['picker', 'controller']) {
+        await test(`Picker selections tolerate ${target} destruction during theme notification`, () => {
+            const node = theme_root(), theme = createTheme({root: node});
+            let callbacks = 0;
+            const picker = themePicker({theme, onChange: () => ++callbacks}).mount(node);
+            const errors = [], error = event => { errors.push(event.error); event.preventDefault(); };
+            const destroy = () => target === 'picker' ? picker.destroy() : theme.destroy();
+            node.addEventListener('webui-theme-change', destroy, {once: true});
+            window.addEventListener('error', error);
+            try {
+                picker.open();
+                picker.buttons.find(button => button.value === 'gromwell').click();
+                equal(theme.name, 'gromwell', 'The theme changes before its listener tears down the controls');
+                equal(errors.length, 0, 'Selection must not update a binding destroyed by its theme listener');
+                equal(callbacks, 0, 'Selection callbacks stop after teardown');
+                equal(picker.isOpen, false); assert(picker.trigger.disabled);
+                assert(!picker.element.contains(document.activeElement), 'Teardown does not restore focus into the picker');
+                equal(picker.destroyed, target === 'picker'); equal(theme.destroyed, target === 'controller');
+            } finally {
+                window.removeEventListener('error', error);
+                node.removeEventListener('webui-theme-change', destroy);
+                picker.destroy(); theme.destroy(); node.remove();
+            }
+        });
+    }
+
+    await test('Picker keyboard navigation, Escape, and outside actions retain ordinary focus behavior', () => {
+        const node = theme_root(), theme = createTheme({root: node, theme: 'sorghum'});
+        const picker = themePicker({theme}).mount(node), outside = document.createElement('button');
+        outside.type = 'button'; outside.textContent = 'Outside picker'; node.append(outside);
+        const key = (target, name) => {
+            const event = new KeyboardEvent('keydown', {key: name, bubbles: true, cancelable: true});
+            target.dispatchEvent(event); return event;
+        };
+        try {
+            picker.trigger.focus(); key(picker.trigger, 'ArrowDown');
+            assert(picker.isOpen); equal(picker.trigger.getAttribute('aria-expanded'), 'true');
+            equal(document.activeElement, picker.buttons.find(button => button.value === 'sorghum'));
+            for (const [name, index] of [['End', 3], ['Home', 0], ['ArrowUp', 3], ['ArrowDown', 0]]) {
+                key(document.activeElement, name); equal(document.activeElement, picker.buttons[index]);
+            }
+            key(document.activeElement, 'Escape');
+            equal(picker.isOpen, false); equal(document.activeElement, picker.trigger);
+            equal(picker.trigger.getAttribute('aria-expanded'), 'false');
+            picker.open(); const tab = key(document.activeElement, 'Tab');
+            equal(picker.isOpen, false); equal(tab.defaultPrevented, false, 'Tab can continue its native focus traversal');
+            picker.open(); outside.focus();
+            equal(picker.isOpen, false); equal(document.activeElement, outside, 'Outside focus is not pulled back');
+            picker.open(); outside.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true}));
+            equal(picker.isOpen, false);
+            picker.open(); equal(picker.close(true), picker); equal(document.activeElement, picker.trigger);
+        } finally { picker.destroy(); theme.destroy(); node.remove(); }
+    });
+
+    await test('Picker updates keep their nodes and honor disabled, hidden, and native fieldset state', () => {
+        const node = theme_root(), theme = createTheme({root: node});
+        const fieldset = document.createElement('fieldset'); node.append(fieldset);
+        const picker = themePicker({theme}).mount(fieldset);
+        const element = picker.element, trigger = picker.trigger, menu = picker.menu, choices = picker.buttons;
+        try {
+            picker.set({label: 'Choose a palette', disabled: true});
+            equal(trigger.getAttribute('aria-label'), 'Choose a palette'); assert(trigger.disabled);
+            trigger.click(); picker.open(); equal(picker.isOpen, false);
+            picker.set({disabled: false}); picker.open(); assert(picker.isOpen);
+            picker.set({disabled: true}); equal(picker.isOpen, false);
+            picker.set({disabled: false}); picker.open(); picker.set({hidden: true});
+            assert(element.hidden); equal(picker.isOpen, false); picker.open(); equal(picker.isOpen, false);
+            picker.set({hidden: false}); fieldset.disabled = true;
+            trigger.click(); picker.open(); equal(picker.isOpen, false);
+            choices.find(button => button.value === 'sorghum').click(); equal(theme.name, 'default');
+            fieldset.disabled = false; picker.open(); assert(picker.isOpen);
+            choices.find(button => button.value === 'gromwell').click(); equal(theme.name, 'gromwell');
+            equal(picker.element, element); equal(picker.trigger, trigger); equal(picker.menu, menu); equal(picker.buttons, choices);
+            rejects(() => picker.set({label: ''})); equal(trigger.getAttribute('aria-label'), 'Choose a palette');
+        } finally { picker.destroy(); theme.destroy(); node.remove(); }
+    });
+
+    await test('Picker disposal releases retained controls and supports controller teardown first', () => {
+        const node = theme_root(), theme = createTheme({root: node});
+        let callbacks = 0;
+        const picker = themePicker({theme, onChange: () => ++callbacks}).mount(node);
+        const initial = picker.buttons.map(button => button.getAttribute('aria-checked')).join(',');
+        try {
+            picker.open(); picker.destroy(); picker.destroy();
+            theme.setTheme('gromwell');
+            equal(picker.buttons.map(button => button.getAttribute('aria-checked')).join(','), initial,
+                'Destroyed pickers unsubscribe from theme changes');
+            node.append(picker.element); picker.menu.hidden = true; picker.trigger.click(); assert(picker.menu.hidden);
+            picker.menu.hidden = false; picker.buttons.find(button => button.value === 'sorghum').click();
+            equal(theme.name, 'gromwell'); equal(callbacks, 0, 'Retained choices release selection listeners');
+            rejects(() => picker.open()); rejects(() => picker.close());
+            const second = themePicker({theme, onChange: () => ++callbacks}).mount(node);
+            try {
+                theme.destroy(); second.trigger.click(); equal(second.isOpen, false);
+                second.buttons.find(button => button.value === 'cloisonne').click();
+                equal(theme.name, 'gromwell'); equal(callbacks, 0);
+                second.destroy(); second.destroy();
+            } finally { second.destroy(); }
+        } finally { picker.destroy(); theme.destroy(); node.remove(); }
+    });
+
+    await test('Pickers use the controller document and reject mismatched documents before binding', async () => {
+        const node = theme_root(), theme = createTheme({root: node}), other = await frame();
+        const doc = other.contentDocument, target = doc.documentElement;
+        const foreign = createTheme({root: target, theme: 'cloisonne'});
+        let picker;
+        try {
+            rejects(() => themePicker({theme, document: doc}));
+            picker = themePicker({theme: foreign}).mount(doc.body);
+            equal(picker.element.ownerDocument, doc); equal(picker.trigger.ownerDocument, doc);
+            picker.open(); assert(picker.isOpen);
+            equal(doc.activeElement, picker.buttons.find(button => button.value === 'cloisonne'));
+            picker.buttons.find(button => button.value === 'sorghum').click();
+            equal(foreign.name, 'sorghum'); equal(doc.activeElement, picker.trigger);
+            equal(theme.name, 'default', 'Another document keeps an independent controller');
+        } finally { picker?.destroy(); foreign.destroy(); theme.destroy(); node.remove(); other.remove(); }
     });
 
     await test('Theme toggles notify once, retain focus, and release their bindings', () => {

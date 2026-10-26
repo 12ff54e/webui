@@ -78,6 +78,7 @@ changes to those properties.
 | --- | --- |
 | `button` | `label`, `variant`, `disabled`, `onClick(event)` |
 | `themeToggle` | `label`, `disabled`; pass a theme controller as `theme` at construction |
+| `themePicker` | `label`, `disabled`, `onChange(name, event)`; pass a theme controller as `theme` at construction |
 | `status` | `text`, `tone` |
 | `panel` | `title`, `description` |
 | `row`, `stack` | `gap` |
@@ -319,11 +320,12 @@ the IDs in the table in code and attributes. The controller owns these
 attributes and notifies renderers when either selection changes:
 
 ```js
-import {createTheme, themeToggle} from './webui/src/index.js';
+import {createTheme, themeToggle, themePicker} from './webui/src/index.js';
 
 const theme = createTheme({root: document.documentElement,
   theme: 'cloisonne', storageKey: 'my-app.mode.v1', defaultMode: 'light'});
 const toggle = themeToggle({theme}).mount(document.getElementById('toolbar'));
+const picker = themePicker({theme}).mount(document.getElementById('toolbar'));
 theme.setMode('dark');
 theme.setTheme('default'); // Selects Celadon and keeps dark mode.
 theme.setMode('light', {persist: false}); // For a temporary host-supplied mode.
@@ -331,6 +333,7 @@ theme.toggleMode();
 console.log(theme.name, theme.mode); // 'default', 'dark'
 // At teardown:
 toggle.destroy();
+picker.destroy();
 theme.destroy();
 ```
 
@@ -339,7 +342,28 @@ returns the controller.
 It preserves the current mode and emits one notification when the theme changes.
 Selecting the current theme emits none. It does not save the theme name or write
 the mode preference. Applications choose how to retain theme identity, such as a
-URL parameter or their own settings. The gallery's Theme selector uses its URL.
+URL parameter or their own settings. The gallery's theme picker uses its URL.
+
+`themePicker` supplies a circular palette button and a dropdown of color circles
+for all built-in themes. Each circle uses that theme's accent in the current
+light or dark mode. A checkmark marks the selected theme. Custom labels appear
+beside circles on hover or keyboard focus; touch screens show the names while
+the menu is open. Labels choose the side with room and wrap on narrow screens.
+
+Pass `onChange(name, event)` to save a user's selection in your URL or settings.
+Selecting the current theme, or changing the controller programmatically, does
+not call it. The picker follows controller changes without replacing its nodes
+and preserves the mode and saved mode preference. Arrow keys, Home, and End move
+between choices; Enter or Space selects; Escape closes and returns focus.
+Clicking or focusing outside dismisses the menu.
+
+The picker exposes `trigger`, `menu`, `buttons`, and `isOpen`, plus `open()` and
+`close(restoreFocus = true)`. Its `id` option names the trigger. Use `set()` to
+change `label`, `disabled`, `hidden`, or `onChange`; hiding or disabling it closes
+the menu. `destroy()` releases its menu and controller listeners without
+destroying the controller. The controller exposes its read-only `root`; the
+picker uses that root's document unless the same document is passed explicitly.
+Recreate both if the root moves to another document.
 
 `themeToggle` supplies a circular native button, a split light/dark icon, and the
 stable accessible label "Dark mode". It manages `aria-pressed` and follows the
@@ -349,6 +373,9 @@ disabled/hidden updates and disposal; destroying it leaves the controller active
 For custom markup, `theme.bindToggle(button)` returns a binding disposer.
 Destroying the controller removes all bindings and its storage listener while
 leaving the DOM and mode in place. Later controller updates throw.
+
+Both shared buttons rotate their icons by 35 degrees on hover or keyboard focus,
+with a small press response. Reduced-motion settings disable these transforms.
 
 Persistence is opt-in: omit `storageKey` to avoid storage access. With a key,
 initial mode uses a valid saved value, then `defaultMode`; existing root

@@ -1,18 +1,15 @@
-import {button, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle,
+import {button, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle, themePicker,
     segmentedControl, rangeField, disclosure, dialog, menu, toolbar, notice, badge, spinner} from '../src/index.js';
 
 const theme = createTheme({theme: document.documentElement.dataset.theme, storageKey: 'webui.gallery.theme.v1'});
 themeToggle({theme, id: 'gallery-theme-toggle'}).mount(document.getElementById('gallery-theme-host'));
-selectField({id: 'gallery-theme-name', label: 'Theme', value: theme.name,
-    options: [{value: 'default', label: 'Celadon'}, {value: 'cloisonne', label: 'Cloisonné'},
-        {value: 'sorghum', label: 'Sorghum'}, {value: 'gromwell', label: 'Gromwell'}],
+themePicker({theme, id: 'gallery-theme-picker',
     onChange: value => {
-        theme.setTheme(value);
         const url = new URL(location.href);
         if (value === 'default') url.searchParams.delete('theme');
         else url.searchParams.set('theme', value);
         history.replaceState(null, '', url);
-    }}).mount(document.getElementById('gallery-theme-name-host'));
+    }}).mount(document.getElementById('gallery-theme-picker-host'));
 
 function element(tag, class_name, text) {
     const node = document.createElement(tag);
