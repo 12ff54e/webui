@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>webui browser checks</title>
+  <link rel="stylesheet" href="../styles/ui.css">
+</head>
+<body>
+  <main class="wui" id="tests"></main>
+  <pre id="report" role="status">Running browser checks…</pre>
+  <script type="module">
+    import {run} from './browser.js';
+    window.webuiResult = await run();
+    document.getElementById('report').textContent = JSON.stringify(window.webuiResult, null, 2);
+  </script>
+</body>
+</html>
