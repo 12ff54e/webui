@@ -305,8 +305,11 @@ Theme identity and mode are separate. Both bundled themes provide `light` and
 
 | Theme ID | Name | Palette |
 | --- | --- | --- |
-| `default` | Default | Warm paper, forest teal, and terracotta |
+| `default` | Celadon | Warm paper, forest teal, and terracotta |
 | `cloisonne` | Cloisonné | Porcelain, blue based on `#2775b6`, and brass |
+
+Celadon is the original theme. Its code ID remains `default`, including the
+controller's `name` property, so existing applications stay compatible.
 
 Each root defaults to the light palette. `data-theme="cloisonne" data-mode="dark"`
 selects Cloisonné in dark mode; nested roots keep their own theme and mode. Use
@@ -320,7 +323,7 @@ const theme = createTheme({root: document.documentElement,
   theme: 'cloisonne', storageKey: 'my-app.mode.v1', defaultMode: 'light'});
 const toggle = themeToggle({theme}).mount(document.getElementById('toolbar'));
 theme.setMode('dark');
-theme.setTheme('default'); // Keeps dark mode.
+theme.setTheme('default'); // Selects Celadon and keeps dark mode.
 theme.setMode('light', {persist: false}); // For a temporary host-supplied mode.
 theme.toggleMode();
 console.log(theme.name, theme.mode); // 'default', 'dark'
