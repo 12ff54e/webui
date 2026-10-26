@@ -134,6 +134,55 @@
     --ui-shadow-overlay: 0 5px 16px #00000040;
 }
 
+/* Sorghum: red grain, warm ivory, and wine. */
+.wui[data-theme='sorghum'] {
+    color-scheme: light;
+    --ui-background: #fbf5ef;
+    --ui-surface: #fffaf5;
+    --ui-text: #452c2b;
+    --ui-muted: #80625e;
+    --ui-accent: #c02c38;
+    --ui-warning: #8b5d1c;
+    --ui-danger: #96375d;
+    --ui-line: #e4d3ca;
+    --ui-grid: #eee1d8;
+    --ui-plot-1: #c02c38;
+    --ui-plot-2: #34736b;
+    --ui-plot-3: #906328;
+    --ui-plot-4: #775a91;
+    --ui-plot-5: #a4512d;
+    --ui-soft: #f7e7df;
+    --ui-danger-soft: #f9e7ef;
+    --ui-warning-soft: #f9edd4;
+    --ui-on-accent: #ffffff;
+    --ui-shadow: 0 3px 16px #48242a0a;
+    --ui-shadow-overlay: 0 5px 16px #48242a22;
+}
+
+.wui[data-theme='sorghum'][data-mode='dark'] {
+    color-scheme: dark;
+    --ui-background: #24191b;
+    --ui-surface: #322326;
+    --ui-text: #f6e7df;
+    --ui-muted: #c9aaa5;
+    --ui-accent: #f48f93;
+    --ui-warning: #e7bc7a;
+    --ui-danger: #f0a3ca;
+    --ui-line: #584044;
+    --ui-grid: #443034;
+    --ui-plot-1: #f48f93;
+    --ui-plot-2: #8bc8b0;
+    --ui-plot-3: #e7bc7a;
+    --ui-plot-4: #9ebae5;
+    --ui-plot-5: #ecaa84;
+    --ui-soft: #4a2c31;
+    --ui-danger-soft: #472638;
+    --ui-warning-soft: #453524;
+    --ui-on-accent: #36151b;
+    --ui-shadow: 0 3px 16px #00000022;
+    --ui-shadow-overlay: 0 5px 16px #00000040;
+}
+
 .wui[data-density='compact'] {
     --ui-control-height: 35px;
     --ui-control-padding: var(--ui-space-1) var(--ui-space-2);

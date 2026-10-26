@@ -300,20 +300,21 @@ choose their page composition.
 Native `.wui-button` toggles can use `data-tone="warning"` with
 `aria-pressed="true"` for a selected warning-colored treatment.
 
-Theme identity and mode are separate. Both bundled themes provide `light` and
+Theme identity and mode are separate. All bundled themes provide `light` and
 `dark` modes:
 
 | Theme ID | Name | Palette |
 | --- | --- | --- |
 | `default` | Celadon | Warm paper, forest teal, and terracotta |
 | `cloisonne` | Cloisonné | Porcelain, blue based on `#2775b6`, and brass |
+| `sorghum` | Sorghum | Warm ivory, grain gold, and red based on `#c02c38` |
 
 Celadon is the original theme. Its code ID remains `default`, including the
 controller's `name` property, so existing applications stay compatible.
 
 Each root defaults to the light palette. `data-theme="cloisonne" data-mode="dark"`
 selects Cloisonné in dark mode; nested roots keep their own theme and mode. Use
-the ASCII ID `cloisonne` in code and attributes. The controller owns these
+the IDs in the table in code and attributes. The controller owns these
 attributes and notifies renderers when either selection changes:
 
 ```js
@@ -332,7 +333,7 @@ toggle.destroy();
 theme.destroy();
 ```
 
-`setTheme(name)` accepts `default` or `cloisonne` and returns the controller.
+`setTheme(name)` accepts `default`, `cloisonne`, or `sorghum` and returns the controller.
 It preserves the current mode and emits one notification when the theme changes.
 Selecting the current theme emits none. It does not save the theme name or write
 the mode preference. Applications choose how to retain theme identity, such as a

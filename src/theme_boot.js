@@ -8,6 +8,6 @@
         try { saved = localStorage.getItem(key); } catch {}
     }
     const name = script?.dataset.theme ?? document.documentElement.dataset.theme;
-    document.documentElement.dataset.theme = name === 'cloisonne' ? 'cloisonne' : 'default';
+    document.documentElement.dataset.theme = name === 'cloisonne' || name === 'sorghum' ? name : 'default';
     document.documentElement.dataset.mode = saved === 'light' || saved === 'dark' ? saved : fallback;
 })();

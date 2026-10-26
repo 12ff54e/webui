@@ -36,86 +36,106 @@ export async function test_themes({test, assert, equal, root}) {
         } finally { first.destroy(); second.destroy(); outer.remove(); }
     });
 
-    await test('Cloisonné provides readable palettes and stays independent of nested themes', () => {
-        const outer = theme_root(), inner = theme_root(outer);
-        const first = createTheme({root: outer, theme: 'cloisonne'}), second = createTheme({root: inner});
-        const luminance = hex => {
-            const channels = hex.slice(1).match(/../g).map(value => {
-                const channel = parseInt(value, 16) / 255;
-                return channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4;
-            });
-            return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
-        };
-        const contrast = (foreground, background) => {
-            const a = luminance(foreground), b = luminance(background);
-            return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
-        };
-        try {
-            const default_light = palette(inner), cloisonne_light = palette(outer);
-            equal(first.name, 'cloisonne'); equal(cloisonne_light.accent, '#2775b6');
-            for (const mode of ['light', 'dark']) {
-                first.setMode(mode);
-                const colors = palette(outer), style = getComputedStyle(outer);
-                const soft = style.getPropertyValue('--ui-soft').trim();
-                const on_accent = style.getPropertyValue('--ui-on-accent').trim();
-                assert(/^#[\da-f]{6}$/i.test(soft) && /^#[\da-f]{6}$/i.test(on_accent));
-                equal(getComputedStyle(outer).colorScheme, mode);
-                for (const name of ['text', 'muted', 'accent']) {
-                    for (const background of [colors.background, colors.surface, soft]) {
-                        assert(contrast(colors[name], background) >= 4.5,
-                            `Cloisonné ${mode} ${name} text must have 4.5:1 contrast on ${background}`);
+    const named_themes = [
+        {id: 'cloisonne', name: 'Cloisonné', accent: '#2775b6'},
+        {id: 'sorghum', name: 'Sorghum', accent: '#c02c38'},
+    ];
+    const luminance = hex => {
+        const channels = hex.slice(1).match(/../g).map(value => {
+            const channel = parseInt(value, 16) / 255;
+            return channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4;
+        });
+        return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+    };
+    const contrast = (foreground, background) => {
+        const a = luminance(foreground), b = luminance(background);
+        return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+    };
+    for (const {id, name, accent} of named_themes) {
+        await test(`${name} provides readable palettes and stays independent of nested themes`, () => {
+            const outer = theme_root(), inner = theme_root(outer), nested = theme_root(inner);
+            const other = named_themes.find(theme => theme.id !== id).id;
+            const first = createTheme({root: outer, theme: id}), second = createTheme({root: inner});
+            const third = createTheme({root: nested, theme: other});
+            try {
+                const default_light = palette(inner), named_light = palette(outer), other_light = palette(nested);
+                equal(first.name, id); equal(named_light.accent, accent); equal(named_light.plot1, accent);
+                for (const mode of ['light', 'dark']) {
+                    first.setMode(mode);
+                    const colors = palette(outer), style = getComputedStyle(outer);
+                    for (const [token, value] of Object.entries(colors)) {
+                        if (token !== 'font' && token !== 'mono')
+                            assert(/^#[\da-f]{6}$/i.test(value), `${name} ${mode} ${token} must be a six-digit color`);
                     }
+                    for (const token of ['soft', 'danger-soft', 'warning-soft', 'on-accent'])
+                        assert(/^#[\da-f]{6}$/i.test(style.getPropertyValue(`--ui-${token}`).trim()),
+                            `${name} ${mode} ${token} must be a six-digit color`);
+                    const soft = style.getPropertyValue('--ui-soft').trim();
+                    const on_accent = style.getPropertyValue('--ui-on-accent').trim();
+                    equal(style.colorScheme, mode);
+                    for (const token of ['text', 'muted', 'accent', 'warning', 'danger']) {
+                        const backgrounds = [colors.background, colors.surface];
+                        if (['text', 'muted', 'accent'].includes(token)) backgrounds.push(soft);
+                        for (const background of backgrounds)
+                            assert(contrast(colors[token], background) >= 4.5,
+                                `${name} ${mode} ${token} text must have 4.5:1 contrast on ${background}`);
+                    }
+                    assert(contrast(on_accent, colors.accent) >= 4.5,
+                        `${name} ${mode} primary-button text must have 4.5:1 contrast`);
+                    equal(JSON.stringify(palette(inner)), JSON.stringify(default_light), 'Nested Celadon keeps its own light palette');
+                    equal(JSON.stringify(palette(nested)), JSON.stringify(other_light), 'A third theme keeps its own light palette');
                 }
-                assert(contrast(on_accent, colors.accent) >= 4.5,
-                    `Cloisonné ${mode} primary-button text must have 4.5:1 contrast`);
-                equal(JSON.stringify(palette(inner)), JSON.stringify(default_light), 'Nested default keeps its own light palette');
-            }
-            const cloisonne_dark = palette(outer);
-            assert(cloisonne_dark.background !== cloisonne_light.background && cloisonne_dark.accent !== cloisonne_light.accent);
-            second.setTheme('cloisonne').setMode('dark');
-            first.setTheme('default').setMode('light');
-            equal(JSON.stringify(palette(outer)), JSON.stringify(default_light));
-            equal(JSON.stringify(palette(inner)), JSON.stringify(cloisonne_dark), 'Nested Cloisonné keeps its own dark palette');
-            second.setMode('light');
-            equal(JSON.stringify(palette(inner)), JSON.stringify(cloisonne_light));
-        } finally { first.destroy(); second.destroy(); outer.remove(); }
-    });
+                const named_dark = palette(outer);
+                assert(named_dark.background !== named_light.background && named_dark.accent !== named_light.accent);
+                second.setTheme(id).setMode('dark');
+                first.setTheme('default').setMode('light');
+                equal(JSON.stringify(palette(outer)), JSON.stringify(default_light));
+                equal(JSON.stringify(palette(inner)), JSON.stringify(named_dark), `Nested ${name} keeps its own dark palette`);
+                equal(JSON.stringify(palette(nested)), JSON.stringify(other_light), 'Nested themes do not inherit mode changes');
+                third.setMode('dark');
+                equal(JSON.stringify(palette(outer)), JSON.stringify(default_light));
+                equal(JSON.stringify(palette(inner)), JSON.stringify(named_dark));
+                second.setMode('light');
+                equal(JSON.stringify(palette(inner)), JSON.stringify(named_light));
+            } finally { first.destroy(); second.destroy(); third.destroy(); outer.remove(); }
+        });
 
-    await test('Theme selection preserves mode, preference, focused controls, and notification counts', () => {
-        const key = `webui.test.selection.${crypto.randomUUID()}`;
-        const node = theme_root();
-        localStorage.setItem(key, 'light');
-        const theme = createTheme({root: node, storageKey: key, theme: 'cloisonne'});
-        const toggle = themeToggle({theme}).mount(node);
-        const changes = [], stop = onThemeChange(node, colors => changes.push(colors.accent));
-        try {
-            toggle.element.focus();
-            theme.setMode('dark', {persist: false}); equal(changes.length, 2);
-            equal(theme.setTheme('default'), theme); equal(changes.length, 3);
-            equal(theme.name, 'default'); equal(theme.mode, 'dark');
-            equal(node.dataset.theme, 'default'); equal(node.dataset.mode, 'dark');
-            equal(toggle.element.getAttribute('aria-pressed'), 'true');
-            equal(document.activeElement, toggle.element);
-            equal(localStorage.getItem(key), 'light', 'Identity changes must not write a mode preference');
-            theme.setTheme('default'); equal(changes.length, 3, 'Same identity does not notify');
-            rejects(() => theme.setTheme('Cloisonné'));
-            rejects(() => theme.setTheme('unknown'));
-            equal(theme.name, 'default'); equal(changes.length, 3, 'Rejected identities do not notify');
-            node.dataset.theme = 'unknown';
-            theme.setTheme('default'); equal(changes.length, 4, 'Repairing the root identity notifies once');
-            theme.setTheme('cloisonne'); equal(changes.length, 5);
-            theme.toggleMode(); equal(theme.mode, 'light'); equal(changes.length, 6);
-            equal(theme.name, 'cloisonne'); equal(localStorage.getItem(key), 'light');
-            window.dispatchEvent(new StorageEvent('storage', {key, newValue: 'dark', storageArea: localStorage}));
-            equal(theme.mode, 'dark'); equal(theme.name, 'cloisonne'); equal(changes.length, 7);
-            equal(localStorage.getItem(key), 'light', 'Stored mode notifications preserve the name without writing back');
-            node.dataset.mode = 'unknown';
-            theme.setTheme('cloisonne'); equal(theme.mode, 'light'); equal(changes.length, 8);
-            theme.destroy();
-            rejects(() => theme.setTheme('default'));
-            equal(node.dataset.theme, 'cloisonne'); equal(changes.length, 8);
-        } finally { stop(); toggle.destroy(); theme.destroy(); node.remove(); localStorage.removeItem(key); }
-    });
+        await test(`${name} selection preserves mode, preference, focused controls, and notification counts`, () => {
+            const key = `webui.test.selection.${crypto.randomUUID()}`;
+            const node = theme_root();
+            localStorage.setItem(key, 'light');
+            const theme = createTheme({root: node, storageKey: key, theme: id});
+            const toggle = themeToggle({theme}).mount(node);
+            const changes = [], stop = onThemeChange(node, colors => changes.push(colors.accent));
+            try {
+                toggle.element.focus();
+                theme.setMode('dark', {persist: false}); equal(changes.length, 2);
+                equal(theme.setTheme('default'), theme); equal(changes.length, 3);
+                equal(theme.name, 'default'); equal(theme.mode, 'dark');
+                equal(node.dataset.theme, 'default'); equal(node.dataset.mode, 'dark');
+                equal(toggle.element.getAttribute('aria-pressed'), 'true');
+                equal(document.activeElement, toggle.element);
+                equal(localStorage.getItem(key), 'light', 'Identity changes must not write a mode preference');
+                theme.setTheme('default'); equal(changes.length, 3, 'Same identity does not notify');
+                rejects(() => theme.setTheme(name));
+                rejects(() => theme.setTheme('unknown'));
+                equal(theme.name, 'default'); equal(changes.length, 3, 'Rejected identities do not notify');
+                node.dataset.theme = 'unknown';
+                theme.setTheme('default'); equal(changes.length, 4, 'Repairing the root identity notifies once');
+                theme.setTheme(id); equal(changes.length, 5);
+                theme.toggleMode(); equal(theme.mode, 'light'); equal(changes.length, 6);
+                equal(theme.name, id); equal(localStorage.getItem(key), 'light');
+                window.dispatchEvent(new StorageEvent('storage', {key, newValue: 'dark', storageArea: localStorage}));
+                equal(theme.mode, 'dark'); equal(theme.name, id); equal(changes.length, 7);
+                equal(localStorage.getItem(key), 'light', 'Stored mode notifications preserve the name without writing back');
+                node.dataset.mode = 'unknown';
+                theme.setTheme(id); equal(theme.mode, 'light'); equal(changes.length, 8);
+                theme.destroy();
+                rejects(() => theme.setTheme('default'));
+                equal(node.dataset.theme, id); equal(changes.length, 8);
+            } finally { stop(); toggle.destroy(); theme.destroy(); node.remove(); localStorage.removeItem(key); }
+        });
+    }
 
     await test('The built-in mode switch owns its icon, label, state, and cleanup', () => {
         const node = theme_root(), form = document.createElement('form'); node.append(form);
@@ -255,11 +275,16 @@ export async function test_themes({test, assert, equal, root}) {
         const script = new URL('../src/theme_boot.js', import.meta.url).href;
         const stylesheet = new URL('../styles/ui.css', import.meta.url).href;
         const cases = [
-            {root: 'cloisonne', mode: 'light', expected: 'cloisonne'},
-            {root: 'cloisonne', mode: 'dark', expected: 'cloisonne'},
-            {root: 'default', configured: 'cloisonne', mode: 'dark', expected: 'cloisonne'},
-            {root: 'cloisonne', configured: 'default', mode: 'light', expected: 'default'},
-            {root: 'cloisonne', configured: 'unknown', mode: 'dark', expected: 'default'},
+            ...named_themes.flatMap(({id}) => [
+                {root: id, mode: 'light', expected: id},
+                {root: id, mode: 'dark', expected: id},
+                {root: 'default', configured: id, mode: 'dark', expected: id},
+                {root: id, configured: 'default', mode: 'light', expected: 'default'},
+                {root: id, configured: 'unknown', mode: 'dark', expected: 'default'},
+            ]),
+            {root: 'cloisonne', configured: 'sorghum', mode: 'dark', expected: 'sorghum'},
+            {root: 'sorghum', configured: 'cloisonne', mode: 'light', expected: 'cloisonne'},
+            {root: 'unknown', configured: 'sorghum', mode: 'light', expected: 'sorghum'},
             {root: 'unknown', mode: 'light', expected: 'default'},
         ];
         try {
