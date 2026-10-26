@@ -7,6 +7,7 @@
     if (key) {
         try { saved = localStorage.getItem(key); } catch {}
     }
-    document.documentElement.dataset.theme = 'default';
+    const name = script?.dataset.theme ?? document.documentElement.dataset.theme;
+    document.documentElement.dataset.theme = name === 'cloisonne' ? 'cloisonne' : 'default';
     document.documentElement.dataset.mode = saved === 'light' || saved === 'dark' ? saved : fallback;
 })();

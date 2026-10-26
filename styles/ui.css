@@ -1,4 +1,4 @@
-/* webui default theme. Colors consumed by renderers use six-digit sRGB hex. */
+/* webui themes. Colors consumed by renderers use six-digit sRGB hex. */
 .wui {
     color-scheme: light;
     --ui-background: #f7f7f1;
@@ -83,6 +83,55 @@
     --ui-warning-soft: #3e3327;
     --ui-on-accent: #15291e;
     --ui-shadow: 0 3px 16px #00000012;
+}
+
+/* Cloisonné: blue enamel, porcelain, and brass. */
+.wui[data-theme='cloisonne'] {
+    color-scheme: light;
+    --ui-background: #f4f7fa;
+    --ui-surface: #fcfdff;
+    --ui-text: #18344b;
+    --ui-muted: #536b7d;
+    --ui-accent: #2775b6;
+    --ui-warning: #8a5d20;
+    --ui-danger: #ae3f4b;
+    --ui-line: #d1dce5;
+    --ui-grid: #dce5ed;
+    --ui-plot-1: #2775b6;
+    --ui-plot-2: #6e5a9e;
+    --ui-plot-3: #936723;
+    --ui-plot-4: #9a496f;
+    --ui-plot-5: #237471;
+    --ui-soft: #f3f7fb;
+    --ui-danger-soft: #faedf0;
+    --ui-warning-soft: #f8f0df;
+    --ui-on-accent: #ffffff;
+    --ui-shadow: 0 3px 16px #152f4a0a;
+    --ui-shadow-overlay: 0 5px 16px #14314a22;
+}
+
+.wui[data-theme='cloisonne'][data-mode='dark'] {
+    color-scheme: dark;
+    --ui-background: #111d2b;
+    --ui-surface: #182b3d;
+    --ui-text: #e5eff7;
+    --ui-muted: #a7bbcd;
+    --ui-accent: #82bdeb;
+    --ui-warning: #e4bb74;
+    --ui-danger: #f0a3ac;
+    --ui-line: #354e66;
+    --ui-grid: #293f54;
+    --ui-plot-1: #82bdeb;
+    --ui-plot-2: #b9a9e5;
+    --ui-plot-3: #e4bb74;
+    --ui-plot-4: #e1a0c0;
+    --ui-plot-5: #8acac5;
+    --ui-soft: #233d55;
+    --ui-danger-soft: #412c38;
+    --ui-warning-soft: #423827;
+    --ui-on-accent: #10283c;
+    --ui-shadow: 0 3px 16px #00000022;
+    --ui-shadow-overlay: 0 5px 16px #00000040;
 }
 
 .wui[data-density='compact'] {

@@ -6,9 +6,9 @@ them explicitly. Applications own their state, scientific rules, workers, and
 renderers.
 
 The library uses native browser elements, ES modules, and a separate stylesheet.
-It has no runtime dependencies or required build step. Version 0.3.0 supplies
-shared controls, typography and spacing, and a default theme with light and dark
-modes. Applications can save mode preferences when needed.
+It has no runtime dependencies or required build step. It supplies shared
+controls, typography and spacing, and themes with light and dark modes.
+Applications can save mode preferences when needed.
 
 ## Start
 
@@ -300,27 +300,40 @@ choose their page composition.
 Native `.wui-button` toggles can use `data-tone="warning"` with
 `aria-pressed="true"` for a selected warning-colored treatment.
 
-Theme identity and mode are separate. The bundled theme is named `default` and
-provides both `light` and `dark` modes. A theme added later must provide both
-palettes; selecting other themes remains deferred. Each root defaults to the
-light palette. `data-theme="default" data-mode="dark"` selects dark mode, while
-nested roots keep their own mode. The controller owns these attributes and
-notifies renderers when the mode changes:
+Theme identity and mode are separate. Both bundled themes provide `light` and
+`dark` modes:
+
+| Theme ID | Name | Palette |
+| --- | --- | --- |
+| `default` | Default | Warm paper, forest teal, and terracotta |
+| `cloisonne` | Cloisonné | Porcelain, blue based on `#2775b6`, and brass |
+
+Each root defaults to the light palette. `data-theme="cloisonne" data-mode="dark"`
+selects Cloisonné in dark mode; nested roots keep their own theme and mode. Use
+the ASCII ID `cloisonne` in code and attributes. The controller owns these
+attributes and notifies renderers when either selection changes:
 
 ```js
 import {createTheme, themeToggle} from './webui/src/index.js';
 
 const theme = createTheme({root: document.documentElement,
-  theme: 'default', storageKey: 'my-app.mode.v1', defaultMode: 'light'});
+  theme: 'cloisonne', storageKey: 'my-app.mode.v1', defaultMode: 'light'});
 const toggle = themeToggle({theme}).mount(document.getElementById('toolbar'));
 theme.setMode('dark');
+theme.setTheme('default'); // Keeps dark mode.
 theme.setMode('light', {persist: false}); // For a temporary host-supplied mode.
 theme.toggleMode();
-console.log(theme.name, theme.mode); // 'default', then 'light' or 'dark'
+console.log(theme.name, theme.mode); // 'default', 'dark'
 // At teardown:
 toggle.destroy();
 theme.destroy();
 ```
+
+`setTheme(name)` accepts `default` or `cloisonne` and returns the controller.
+It preserves the current mode and emits one notification when the theme changes.
+Selecting the current theme emits none. It does not save the theme name or write
+the mode preference. Applications choose how to retain theme identity, such as a
+URL parameter or their own settings. The gallery's Theme selector uses its URL.
 
 `themeToggle` supplies a circular native button, a split light/dark icon, and the
 stable accessible label "Dark mode". It manages `aria-pressed` and follows the
@@ -346,7 +359,7 @@ To restore a document theme before the first paint, put the optional classic
 helper before stylesheets and use the same key and default in the controller:
 
 ```html
-<html class="wui" data-theme="default">
+<html class="wui" data-theme="cloisonne">
 <head>
   <script src="./webui/src/theme_boot.js"
     data-storage-key="my-app.mode.v1" data-default-mode="light"></script>
@@ -354,9 +367,12 @@ helper before stylesheets and use the same key and default in the controller:
 </head>
 ```
 
-The helper sets the root's theme identity to `default` and restores its mode.
-It uses a valid saved preference or the given default, and falls back to light
-when no default is given. It creates no controller or global API.
+The helper uses its script's `data-theme` when present, then the root's
+`data-theme`. An unknown name falls back to `default`. It restores mode from a
+valid saved preference or `data-default-mode`, falling back to light when no
+default is given. Create the controller with the same theme name, key, and
+default mode to keep that first palette. The helper creates no controller or
+global API.
 
 Canvas and GPU renderers can read the same palette:
 

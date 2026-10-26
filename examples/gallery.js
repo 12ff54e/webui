@@ -1,8 +1,17 @@
 import {button, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle,
     segmentedControl, rangeField, disclosure, dialog, menu, toolbar, notice, badge, spinner} from '../src/index.js';
 
-const theme = createTheme({storageKey: 'webui.gallery.theme.v1'});
+const theme = createTheme({theme: document.documentElement.dataset.theme, storageKey: 'webui.gallery.theme.v1'});
 themeToggle({theme, id: 'gallery-theme-toggle'}).mount(document.getElementById('gallery-theme-host'));
+selectField({id: 'gallery-theme-name', label: 'Theme', value: theme.name,
+    options: [{value: 'default', label: 'Default'}, {value: 'cloisonne', label: 'Cloisonné'}],
+    onChange: value => {
+        theme.setTheme(value);
+        const url = new URL(location.href);
+        if (value === 'default') url.searchParams.delete('theme');
+        else url.searchParams.set('theme', value);
+        history.replaceState(null, '', url);
+    }}).mount(document.getElementById('gallery-theme-name-host'));
 
 function element(tag, class_name, text) {
     const node = document.createElement(tag);

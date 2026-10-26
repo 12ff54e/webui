@@ -36,6 +36,87 @@ export async function test_themes({test, assert, equal, root}) {
         } finally { first.destroy(); second.destroy(); outer.remove(); }
     });
 
+    await test('Cloisonné provides readable palettes and stays independent of nested themes', () => {
+        const outer = theme_root(), inner = theme_root(outer);
+        const first = createTheme({root: outer, theme: 'cloisonne'}), second = createTheme({root: inner});
+        const luminance = hex => {
+            const channels = hex.slice(1).match(/../g).map(value => {
+                const channel = parseInt(value, 16) / 255;
+                return channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4;
+            });
+            return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+        };
+        const contrast = (foreground, background) => {
+            const a = luminance(foreground), b = luminance(background);
+            return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+        };
+        try {
+            const default_light = palette(inner), cloisonne_light = palette(outer);
+            equal(first.name, 'cloisonne'); equal(cloisonne_light.accent, '#2775b6');
+            for (const mode of ['light', 'dark']) {
+                first.setMode(mode);
+                const colors = palette(outer), style = getComputedStyle(outer);
+                const soft = style.getPropertyValue('--ui-soft').trim();
+                const on_accent = style.getPropertyValue('--ui-on-accent').trim();
+                assert(/^#[\da-f]{6}$/i.test(soft) && /^#[\da-f]{6}$/i.test(on_accent));
+                equal(getComputedStyle(outer).colorScheme, mode);
+                for (const name of ['text', 'muted', 'accent']) {
+                    for (const background of [colors.background, colors.surface, soft]) {
+                        assert(contrast(colors[name], background) >= 4.5,
+                            `Cloisonné ${mode} ${name} text must have 4.5:1 contrast on ${background}`);
+                    }
+                }
+                assert(contrast(on_accent, colors.accent) >= 4.5,
+                    `Cloisonné ${mode} primary-button text must have 4.5:1 contrast`);
+                equal(JSON.stringify(palette(inner)), JSON.stringify(default_light), 'Nested default keeps its own light palette');
+            }
+            const cloisonne_dark = palette(outer);
+            assert(cloisonne_dark.background !== cloisonne_light.background && cloisonne_dark.accent !== cloisonne_light.accent);
+            second.setTheme('cloisonne').setMode('dark');
+            first.setTheme('default').setMode('light');
+            equal(JSON.stringify(palette(outer)), JSON.stringify(default_light));
+            equal(JSON.stringify(palette(inner)), JSON.stringify(cloisonne_dark), 'Nested Cloisonné keeps its own dark palette');
+            second.setMode('light');
+            equal(JSON.stringify(palette(inner)), JSON.stringify(cloisonne_light));
+        } finally { first.destroy(); second.destroy(); outer.remove(); }
+    });
+
+    await test('Theme selection preserves mode, preference, focused controls, and notification counts', () => {
+        const key = `webui.test.selection.${crypto.randomUUID()}`;
+        const node = theme_root();
+        localStorage.setItem(key, 'light');
+        const theme = createTheme({root: node, storageKey: key, theme: 'cloisonne'});
+        const toggle = themeToggle({theme}).mount(node);
+        const changes = [], stop = onThemeChange(node, colors => changes.push(colors.accent));
+        try {
+            toggle.element.focus();
+            theme.setMode('dark', {persist: false}); equal(changes.length, 2);
+            equal(theme.setTheme('default'), theme); equal(changes.length, 3);
+            equal(theme.name, 'default'); equal(theme.mode, 'dark');
+            equal(node.dataset.theme, 'default'); equal(node.dataset.mode, 'dark');
+            equal(toggle.element.getAttribute('aria-pressed'), 'true');
+            equal(document.activeElement, toggle.element);
+            equal(localStorage.getItem(key), 'light', 'Identity changes must not write a mode preference');
+            theme.setTheme('default'); equal(changes.length, 3, 'Same identity does not notify');
+            rejects(() => theme.setTheme('Cloisonné'));
+            rejects(() => theme.setTheme('unknown'));
+            equal(theme.name, 'default'); equal(changes.length, 3, 'Rejected identities do not notify');
+            node.dataset.theme = 'unknown';
+            theme.setTheme('default'); equal(changes.length, 4, 'Repairing the root identity notifies once');
+            theme.setTheme('cloisonne'); equal(changes.length, 5);
+            theme.toggleMode(); equal(theme.mode, 'light'); equal(changes.length, 6);
+            equal(theme.name, 'cloisonne'); equal(localStorage.getItem(key), 'light');
+            window.dispatchEvent(new StorageEvent('storage', {key, newValue: 'dark', storageArea: localStorage}));
+            equal(theme.mode, 'dark'); equal(theme.name, 'cloisonne'); equal(changes.length, 7);
+            equal(localStorage.getItem(key), 'light', 'Stored mode notifications preserve the name without writing back');
+            node.dataset.mode = 'unknown';
+            theme.setTheme('cloisonne'); equal(theme.mode, 'light'); equal(changes.length, 8);
+            theme.destroy();
+            rejects(() => theme.setTheme('default'));
+            equal(node.dataset.theme, 'cloisonne'); equal(changes.length, 8);
+        } finally { stop(); toggle.destroy(); theme.destroy(); node.remove(); localStorage.removeItem(key); }
+    });
+
     await test('The built-in mode switch owns its icon, label, state, and cleanup', () => {
         const node = theme_root(), form = document.createElement('form'); node.append(form);
         const theme = createTheme({root: node});
@@ -164,6 +245,40 @@ export async function test_themes({test, assert, equal, root}) {
                     theme = createTheme({root: node.contentDocument.documentElement, storageKey: key, defaultMode: fallback});
                     equal(theme.mode, expected);
                     equal(palette(node.contentDocument.documentElement).background, expected === 'dark' ? '#141e1a' : '#f7f7f1');
+                } finally { theme?.destroy(); node.remove(); }
+            }
+        } finally { sessionStorage.removeItem(key); }
+    });
+
+    await test('The boot helper selects configured names before paint and rejects invalid identities', async () => {
+        const key = `webui.test.named-boot.${crypto.randomUUID()}`;
+        const script = new URL('../src/theme_boot.js', import.meta.url).href;
+        const stylesheet = new URL('../styles/ui.css', import.meta.url).href;
+        const cases = [
+            {root: 'cloisonne', mode: 'light', expected: 'cloisonne'},
+            {root: 'cloisonne', mode: 'dark', expected: 'cloisonne'},
+            {root: 'default', configured: 'cloisonne', mode: 'dark', expected: 'cloisonne'},
+            {root: 'cloisonne', configured: 'default', mode: 'light', expected: 'default'},
+            {root: 'cloisonne', configured: 'unknown', mode: 'dark', expected: 'default'},
+            {root: 'unknown', mode: 'light', expected: 'default'},
+        ];
+        try {
+            for (const entry of cases) {
+                sessionStorage.setItem(key, entry.mode);
+                const configured = entry.configured === undefined ? '' : `data-theme="${entry.configured}"`;
+                const node = await frame(`<!doctype html><html class="wui" data-theme="${entry.root}"><head>
+                    <script>Object.defineProperty(window, 'localStorage', {get: () => parent.sessionStorage});<\/script>
+                    <script src="${script}" ${configured} data-storage-key="${key}"><\/script>
+                    <script>window.bootSelection = {...document.documentElement.dataset};<\/script>
+                    <link rel="stylesheet" href="${stylesheet}"></head></html>`);
+                let theme;
+                try {
+                    equal(node.contentWindow.bootSelection.theme, entry.expected);
+                    equal(node.contentWindow.bootSelection.mode, entry.mode);
+                    const target = node.contentDocument.documentElement, before = palette(target);
+                    theme = createTheme({root: target, theme: entry.expected, storageKey: key});
+                    equal(theme.name, entry.expected); equal(theme.mode, entry.mode);
+                    equal(JSON.stringify(palette(target)), JSON.stringify(before), 'Controller startup must keep the boot palette');
                 } finally { theme?.destroy(); node.remove(); }
             }
         } finally { sessionStorage.removeItem(key); }
