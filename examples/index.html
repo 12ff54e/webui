@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="webui: a shared visual language for scientific tools. Explore small, browser-native components and interface examples.">
+  <title>webui · A common language for scientific tools</title>
+  <link rel="stylesheet" href="../styles/ui.css">
+  <link rel="stylesheet" href="fonts.css">
+  <link rel="stylesheet" href="gallery.css">
+</head>
+<body class="wui gallery">
+  <a class="gallery-skip" href="#examples">Skip to examples</a>
+  <header class="gallery-header gallery-width">
+    <a class="gallery-brand" href="#" aria-label="webui home"><span class="gallery-mark" aria-hidden="true"><i></i><i></i><i></i></span><span>web<span class="gallery-brand-suffix">ui</span></span></a>
+    <nav aria-label="Gallery navigation"><a href="#examples">Examples</a><a href="#components">Components</a><a href="#principles">Principles</a></nav>
+    <span class="gallery-version">0.1 <span>—</span> early edition</span>
+  </header>
+  <main class="gallery-width">
+    <section class="gallery-intro" aria-labelledby="gallery-title">
+      <div><p class="gallery-eyebrow">A shared visual language</p><h1 id="gallery-title">Shared controls.<br>Scientific <em>tools.</em></h1><p class="gallery-lead">Small components for scientific work.<br>Consistent controls, clear states, flexible layouts.</p><a class="gallery-jump" href="#examples">Explore the components <span aria-hidden="true">↘</span></a></div>
+      <div class="gallery-identity" aria-label="Visual foundation: warm paper, forest teal, terracotta, Biolinum and Libertine">
+        <div class="gallery-type-sample" aria-hidden="true"><span>Aa</span><small>α β φ</small></div>
+        <div class="gallery-swatch-strip" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="gallery-foundation"><span>01 / Foundation</span><p>Biolinum for controls.<br>Libertine for headings.</p></div>
+      </div>
+    </section>
+    <section class="gallery-section" id="examples" aria-labelledby="examples-title">
+      <div class="gallery-section-head"><div><p class="gallery-eyebrow">01 / In context</p><h2 id="examples-title">One library, different tools.</h2></div><p>Interface examples built from the same components.<br>These forms demonstrate the UI; they do not run a solver.</p></div>
+      <div id="examples-host"></div>
+    </section>
+    <section class="gallery-section" id="components" aria-labelledby="components-title">
+      <div class="gallery-section-head"><div><p class="gallery-eyebrow">02 / The essentials</p><h2 id="components-title">A small set of components.</h2></div><p>Native controls with shared structure,<br>spacing, and feedback.</p></div>
+      <div class="gallery-component-grid"><div id="actions-host"></div><div id="feedback-host"></div></div>
+    </section>
+    <section class="gallery-principles gallery-section" id="principles" aria-labelledby="principles-title">
+      <div><p class="gallery-eyebrow">03 / Design principles</p><h2 id="principles-title">Shared design.<br>Independent apps.</h2><p class="gallery-principles-lead">Each project shares controls and styling while keeping its own application logic.</p></div>
+      <dl><div><dt><span>01</span>Direct construction</dt><dd>Create components in JavaScript. Update them through small, explicit methods.</dd></div><div><dt><span>02</span>Application-owned science</dt><dd>Keep numerical rules, workers, and plots in the application. Share the controls around them.</dd></div><div><dt><span>03</span>A foundation for themes</dt><dd>Semantic CSS variables define the palette. This edition ships one default theme.</dd></div></dl>
+    </section>
+  </main>
+  <footer class="gallery-footer gallery-width"><span class="gallery-footer-name">webui</span><span>Shared controls for scientific applications.</span><a href="../README.md">Read the source guide <span aria-hidden="true">↗</span></a></footer>
+  <script type="module" src="gallery.js"></script>
+</body>
+</html>
