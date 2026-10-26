@@ -8,13 +8,13 @@ const colors = {
 };
 
 const valid_mode = value => value === 'light' || value === 'dark';
-const valid_theme = value => value === 'default' || value === 'cloisonne' || value === 'sorghum';
+const valid_theme = value => value === 'default' || value === 'cloisonne' || value === 'sorghum' || value === 'gromwell';
 
 // One controller owns selection for a root. Storage is opt-in and may be denied.
 export function createTheme({root = globalThis.document?.documentElement, theme = 'default', storageKey = null, defaultMode = 'light'} = {}) {
     const view = root?.ownerDocument?.defaultView;
     if (!view) throw new Error('Create a theme for an element in a browser document.');
-    if (!valid_theme(theme)) throw new TypeError('Choose default, cloisonne, or sorghum as the theme.');
+    if (!valid_theme(theme)) throw new TypeError('Choose default, cloisonne, sorghum, or gromwell as the theme.');
     if (!valid_mode(defaultMode)) throw new TypeError('Choose light or dark as the default mode.');
     if (storageKey !== null && (typeof storageKey !== 'string' || !storageKey))
         throw new TypeError('Use a nonempty storage key or null.');
@@ -30,7 +30,7 @@ export function createTheme({root = globalThis.document?.documentElement, theme 
         get destroyed() { return destroyed; },
         setTheme(value) {
             assert_live();
-            if (!valid_theme(value)) throw new TypeError('Choose default, cloisonne, or sorghum as the theme.');
+            if (!valid_theme(value)) throw new TypeError('Choose default, cloisonne, sorghum, or gromwell as the theme.');
             const mode = handle.mode;
             const changed = theme !== value || root.dataset.theme !== value || root.dataset.mode !== mode;
             theme = value;

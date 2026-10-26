@@ -5,7 +5,7 @@ const theme = createTheme({theme: document.documentElement.dataset.theme, storag
 themeToggle({theme, id: 'gallery-theme-toggle'}).mount(document.getElementById('gallery-theme-host'));
 selectField({id: 'gallery-theme-name', label: 'Theme', value: theme.name,
     options: [{value: 'default', label: 'Celadon'}, {value: 'cloisonne', label: 'Cloisonné'},
-        {value: 'sorghum', label: 'Sorghum'}],
+        {value: 'sorghum', label: 'Sorghum'}, {value: 'gromwell', label: 'Gromwell'}],
     onChange: value => {
         theme.setTheme(value);
         const url = new URL(location.href);

@@ -308,6 +308,7 @@ Theme identity and mode are separate. All bundled themes provide `light` and
 | `default` | Celadon | Warm paper, forest teal, and terracotta |
 | `cloisonne` | Cloisonné | Porcelain, blue based on `#2775b6`, and brass |
 | `sorghum` | Sorghum | Warm ivory, grain gold, and red based on `#c02c38` |
+| `gromwell` | Gromwell | Pale lilac, muted gold, and purple based on `#5d3a6f` |
 
 Celadon is the original theme. Its code ID remains `default`, including the
 controller's `name` property, so existing applications stay compatible.
@@ -333,7 +334,8 @@ toggle.destroy();
 theme.destroy();
 ```
 
-`setTheme(name)` accepts `default`, `cloisonne`, or `sorghum` and returns the controller.
+`setTheme(name)` accepts `default`, `cloisonne`, `sorghum`, or `gromwell` and
+returns the controller.
 It preserves the current mode and emits one notification when the theme changes.
 Selecting the current theme emits none. It does not save the theme name or write
 the mode preference. Applications choose how to retain theme identity, such as a

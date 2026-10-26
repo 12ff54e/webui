@@ -183,6 +183,55 @@
     --ui-shadow-overlay: 0 5px 16px #00000040;
 }
 
+/* Gromwell: rich plum, pale lilac, and muted gold. */
+.wui[data-theme='gromwell'] {
+    color-scheme: light;
+    --ui-background: #f8f4f8;
+    --ui-surface: #fffaff;
+    --ui-text: #382b40;
+    --ui-muted: #705c78;
+    --ui-accent: #5d3a6f;
+    --ui-warning: #88601d;
+    --ui-danger: #a13f59;
+    --ui-line: #dfd3e3;
+    --ui-grid: #eae0ee;
+    --ui-plot-1: #5d3a6f;
+    --ui-plot-2: #39716d;
+    --ui-plot-3: #8a6428;
+    --ui-plot-4: #a34e61;
+    --ui-plot-5: #3e6898;
+    --ui-soft: #eee5f2;
+    --ui-danger-soft: #f9e9ef;
+    --ui-warning-soft: #f8f0df;
+    --ui-on-accent: #ffffff;
+    --ui-shadow: 0 3px 16px #3922430a;
+    --ui-shadow-overlay: 0 5px 16px #39224322;
+}
+
+.wui[data-theme='gromwell'][data-mode='dark'] {
+    color-scheme: dark;
+    --ui-background: #1e1824;
+    --ui-surface: #2b2233;
+    --ui-text: #eee5f4;
+    --ui-muted: #bdaac9;
+    --ui-accent: #c7a3df;
+    --ui-warning: #e6bd79;
+    --ui-danger: #f0a3ba;
+    --ui-line: #4c3d59;
+    --ui-grid: #3b2e47;
+    --ui-plot-1: #c7a3df;
+    --ui-plot-2: #8cc9bd;
+    --ui-plot-3: #e6bd79;
+    --ui-plot-4: #eca5bc;
+    --ui-plot-5: #a0bfe9;
+    --ui-soft: #3b2b48;
+    --ui-danger-soft: #432b3d;
+    --ui-warning-soft: #413526;
+    --ui-on-accent: #281830;
+    --ui-shadow: 0 3px 16px #00000022;
+    --ui-shadow-overlay: 0 5px 16px #00000040;
+}
+
 .wui[data-density='compact'] {
     --ui-control-height: 35px;
     --ui-control-padding: var(--ui-space-1) var(--ui-space-2);

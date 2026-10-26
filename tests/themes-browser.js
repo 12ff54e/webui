@@ -39,6 +39,7 @@ export async function test_themes({test, assert, equal, root}) {
     const named_themes = [
         {id: 'cloisonne', name: 'Cloisonné', accent: '#2775b6'},
         {id: 'sorghum', name: 'Sorghum', accent: '#c02c38'},
+        {id: 'gromwell', name: 'Gromwell', accent: '#5d3a6f'},
     ];
     const luminance = hex => {
         const channels = hex.slice(1).match(/../g).map(value => {
@@ -51,10 +52,10 @@ export async function test_themes({test, assert, equal, root}) {
         const a = luminance(foreground), b = luminance(background);
         return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
     };
-    for (const {id, name, accent} of named_themes) {
+    for (const [index, {id, name, accent}] of named_themes.entries()) {
         await test(`${name} provides readable palettes and stays independent of nested themes`, () => {
             const outer = theme_root(), inner = theme_root(outer), nested = theme_root(inner);
-            const other = named_themes.find(theme => theme.id !== id).id;
+            const other = named_themes[(index + 1) % named_themes.length].id;
             const first = createTheme({root: outer, theme: id}), second = createTheme({root: inner});
             const third = createTheme({root: nested, theme: other});
             try {
@@ -285,6 +286,9 @@ export async function test_themes({test, assert, equal, root}) {
             {root: 'cloisonne', configured: 'sorghum', mode: 'dark', expected: 'sorghum'},
             {root: 'sorghum', configured: 'cloisonne', mode: 'light', expected: 'cloisonne'},
             {root: 'unknown', configured: 'sorghum', mode: 'light', expected: 'sorghum'},
+            {root: 'sorghum', configured: 'gromwell', mode: 'dark', expected: 'gromwell'},
+            {root: 'gromwell', configured: 'cloisonne', mode: 'light', expected: 'cloisonne'},
+            {root: 'unknown', configured: 'gromwell', mode: 'light', expected: 'gromwell'},
             {root: 'unknown', mode: 'light', expected: 'default'},
         ];
         try {
