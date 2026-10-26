@@ -46,6 +46,17 @@ export async function run() {
         child.mount(root); parent.destroy(); assert(!child.destroyed);
         child.destroy();
     });
+    await test('Raw DOM moves cannot create a cycle in component ownership', () => {
+        const child = stack();
+        const parent = stack({children: [child]}).mount(root);
+        root.append(child.element);
+        let rejected = false;
+        try { child.append(parent); } catch { rejected = true; }
+        assert(rejected, 'Reject a logical ancestor even after its DOM child moves');
+        equal(parent.element.parentNode, root, 'Rejected append leaves placement unchanged');
+        equal(child.element.parentNode, root);
+        parent.destroy(); assert(child.destroyed);
+    });
     await test('Keyboard tabs skip disabled entries, wrap, and retain panels', () => {
         const a = numberField({label: 'Value', value: 3});
         const b = status({text: 'Result'});

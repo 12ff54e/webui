@@ -124,7 +124,8 @@
 .wui .wui-tabs { min-width: 0; }
 .wui .wui-tab-list { display: flex; gap: 24px; overflow-x: auto; border-bottom: 1px solid var(--ui-line); }
 .wui .wui-tab { position: relative; flex: 0 0 auto; padding: 0 0 14px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; color: var(--ui-muted); font: inherit; cursor: pointer; }
-.wui .wui-tab:hover { color: var(--ui-accent); }
+.wui .wui-tab:hover:enabled { color: var(--ui-accent); }
+.wui .wui-tab:disabled { opacity: .48; cursor: not-allowed; }
 .wui .wui-tab[aria-selected='true'] { border-bottom-color: var(--ui-accent); color: var(--ui-accent); }
 .wui .wui-tab:focus-visible { outline-offset: -3px; }
 .wui .wui-tab-panel { padding-top: 24px; }

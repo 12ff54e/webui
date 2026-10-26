@@ -4,6 +4,24 @@ export async function test_fields({test, assert, equal, root}) {
     const event = (input, type) => input.dispatchEvent(new input.ownerDocument.defaultView.Event(type, {bubbles: true}));
     const edit = (field, text) => { field.input.value = text; event(field.input, 'input'); };
 
+    await test('disabling a fieldset does not commit a focused child draft', async () => {
+        for (const create of [numberField, textField]) {
+            const fieldset = document.createElement('fieldset');
+            root.append(fieldset);
+            let calls = 0;
+            const initial = create === numberField ? 1 : 'initial';
+            const field = create({label: 'Draft', value: initial, onCommit: () => ++calls}).mount(fieldset);
+            try {
+                field.input.focus(); edit(field, '2');
+                fieldset.disabled = true;
+                await new Promise(resolve => setTimeout(resolve, 50));
+                equal(calls, 0);
+                equal(field.value, initial);
+                equal(field.draft, '2');
+            } finally { field.destroy(); fieldset.remove(); }
+        }
+    });
+
     await test('numeric drafts survive invalid commits and commit once when valid', () => {
         const changes = [];
         const field = numberField({label: 'Tolerance', value: 1e-5, required: true,

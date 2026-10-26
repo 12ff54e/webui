@@ -19,7 +19,7 @@ function ignore_event(handle, input, updating, event) {
     if (!event) return false; // Explicit commit() remains available to callers.
     // Disabling or hiding a focused control can emit change/blur after set()
     // returns. Those lifecycle events must not commit an application update.
-    if (input.disabled || !input.isConnected || !input.getClientRects().length) return true;
+    if (input.matches(':disabled') || !input.isConnected || !input.getClientRects().length) return true;
     const visibility = input.ownerDocument.defaultView?.getComputedStyle(input).visibility;
     return visibility === 'hidden' || visibility === 'collapse';
 }

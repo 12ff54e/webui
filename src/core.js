@@ -77,6 +77,12 @@ export function append_owned(parent, target, children = []) {
     for (const child of children) {
         if (child == null) continue;
         if (components.has(child)) {
+            // DOM placement can differ from ownership after a caller moves a
+            // raw element. Check both graphs before changing either one.
+            const child_state = components.get(child);
+            for (let ancestor = components.get(parent); ancestor; ancestor = ancestor.owner) {
+                if (ancestor === child_state) throw new Error('Component ownership cannot contain a cycle.');
+            }
             // Append first: failed DOM insertion must not change ownership.
             if (child.destroyed || child.element.contains(parent.element))
                 throw new Error('Cannot append a destroyed component or an ancestor.');
