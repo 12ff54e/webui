@@ -1,4 +1,5 @@
-import {button, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle} from '../src/index.js';
+import {button, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle,
+    segmentedControl, rangeField, disclosure, dialog, menu, toolbar, notice, badge, spinner} from '../src/index.js';
 
 const theme = createTheme({storageKey: 'webui.gallery.theme.v1'});
 themeToggle({theme, id: 'gallery-theme-toggle'}).mount(document.getElementById('gallery-theme-host'));
@@ -134,5 +135,74 @@ panel({title: 'Feedback', description: 'Words carry the meaning; color supports 
     status({text: 'Check the resolution before continuing.', tone: 'warning'}),
     status({text: 'Enter a finite number greater than zero.', tone: 'danger'}),
 ]})]}).mount(document.getElementById('feedback-host'));
+
+const interaction_notice = notice({text: 'Drag the angle slider or choose a precision mode.'});
+let allow_paired = false;
+const precision = segmentedControl({id: 'gallery-precision', label: 'Precision mode', controlled: true,
+    items: [{value: 'single', label: 'Single'}, {value: 'paired', label: 'Paired'}],
+    onChange: value => {
+        if (value === 'paired' && !allow_paired) {
+            interaction_notice.set({text: 'Open Validation policy and allow paired mode first.', tone: 'warning'});
+            return;
+        }
+        precision.set({value});
+        interaction_notice.set({text: `The application accepted ${value} mode.`, tone: 'success'});
+    }});
+const angle = rangeField({id: 'gallery-angle', label: 'View angle', unit: 'degrees', min: 0, max: 360, step: 1, value: 45,
+    help: 'The native range input sends updates while you drag.',
+    onInput: value => interaction_notice.set({text: `Live angle: ${value}°.`, tone: 'neutral'})});
+const validation = disclosure({label: 'Validation policy', children: [stack({gap: 'small', children: [
+    element('p', 'wui-helper', 'This example lets the application accept or reject a requested selection.'),
+    checkbox({id: 'gallery-allow-paired', label: 'Allow paired mode', value: false, onChange: value => {
+        allow_paired = value;
+        if (!value && precision.value === 'paired') precision.set({value: 'single'});
+        interaction_notice.set({text: value ? 'Paired mode is available.' : 'Only single mode is available.', tone: 'neutral'});
+    }}),
+]})]});
+panel({title: 'Live controls', description: 'Keep the application in charge of accepted settings.',
+    children: [stack({children: [angle, precision, validation, interaction_notice]})]})
+    .mount(document.getElementById('interaction-host'));
+
+const overlay_notice = notice({text: 'Choose a format, open the dialog, or pause the activity indicator.'});
+const format_badge = badge({text: 'Native file'});
+const format_anchor = row({gap: 'small'});
+format_anchor.element.classList.add('wui-menu-anchor');
+const format_trigger = button({id: 'gallery-format-trigger', label: 'Format'});
+const formats = menu({id: 'gallery-format-menu', trigger: format_trigger.element, container: format_anchor.element,
+    label: 'Example file format', value: 'native', items: [
+        {value: 'native', label: 'Native file'}, {value: 'text', label: 'Structured text'},
+    ], onSelect: value => {
+        const label = value === 'native' ? 'Native file' : 'Structured text';
+        format_badge.set({text: label});
+        overlay_notice.set({text: `${label} selected. This example does not write a file.`, tone: 'success'});
+    }});
+format_anchor.append(format_trigger, formats);
+const form = document.createElement('form'); form.method = 'dialog';
+form.append(element('p', 'wui-message', 'Confirm this example action to see the native dialog return value.'));
+const form_actions = element('div', 'wui-actions');
+for (const [value, label, variant] of [['cancel', 'Cancel', 'secondary'], ['confirm', 'Confirm', 'primary']]) {
+    const action = element('button', 'wui-button', label);
+    action.type = 'submit'; action.value = value; action.dataset.variant = variant;
+    form_actions.append(action);
+}
+form.append(form_actions);
+const confirmation = dialog({id: 'gallery-dialog', title: 'Confirm example action', children: [form],
+    onClose: value => overlay_notice.set({text: value === 'confirm' ? 'Example action confirmed.' : 'Dialog closed.', tone: 'neutral'})});
+const open_dialog = button({id: 'gallery-open-dialog', label: 'Open dialog', onClick: () => {
+    confirmation.element.returnValue = ''; confirmation.showModal();
+}});
+let active = true;
+const activity = spinner({id: 'gallery-spinner', label: 'Example activity'});
+const activity_badge = badge({text: 'Active', tone: 'success'});
+const toggle_activity = button({id: 'gallery-toggle-activity', label: 'Pause activity', onClick: () => {
+    active = !active;
+    activity.set({hidden: !active});
+    activity_badge.set({text: active ? 'Active' : 'Paused', tone: active ? 'success' : 'neutral'});
+    toggle_activity.set({label: active ? 'Pause activity' : 'Resume activity'});
+}});
+panel({title: 'Menus and dialogs', description: 'Native interaction with shared presentation.',
+    children: [stack({children: [toolbar({label: 'Example actions', children: [format_anchor, open_dialog]}),
+        row({gap: 'small', children: [format_badge, activity, activity_badge, toggle_activity]}), overlay_notice, confirmation]})]})
+    .mount(document.getElementById('overlays-host'));
 
 document.body.dataset.gallery = 'ready';

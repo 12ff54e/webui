@@ -6,9 +6,9 @@ them explicitly. Applications own their state, scientific rules, workers, and
 renderers.
 
 The library uses native browser elements, ES modules, and a separate stylesheet.
-It has no runtime dependencies or required build step. Version 0.2.0 includes a
-default theme with light and dark modes, a shared mode switch, and optional saved
-preferences.
+It has no runtime dependencies or required build step. Version 0.3.0 supplies
+shared controls, typography and spacing, and a default theme with light and dark
+modes. Applications can save mode preferences when needed.
 
 ## Start
 
@@ -48,7 +48,8 @@ Load the stylesheet and create components in a module script:
 
 Serve the files over HTTP(S), with JavaScript MIME types. Opening the page through
 `file://` is not supported. A package manager is optional; the package exports its
-JS entry point and `webui/style.css` for consumers that use one.
+JS entry point, `webui/style.css`, and optional `webui/fonts.css` for consumers
+that use one.
 
 Open [the gallery](examples/index.html) from the same static server. Its equilibrium
 and trajectory forms demonstrate composition; they do not run computations or
@@ -56,8 +57,8 @@ establish integration with cuMES, GEPT, FACS, or meow.
 
 ## Components
 
-All factories accept an optional `document` for creating elements in another
-browser document. All handles expose:
+All component factories accept an optional `document` for creating elements in
+another browser document. Component handles expose:
 
 | Member | Contract |
 | --- | --- |
@@ -85,6 +86,14 @@ changes to those properties.
 | `numberField` | `value`, `min`, `max`, `integer`, `onCommit(value, event)`, common field properties |
 | `selectField` | `value`, `options`, `onChange(value, event)`, common field properties |
 | `checkbox` | Boolean `value`, `onChange(value, event)`, common field properties |
+| `segmentedControl` | `value`, `label`, `disabled`, `onChange(value, event)`; `items` and `controlled` are construction options |
+| `rangeField` | `value`, `min`, `max`, `step`, `label`, `unit`, `help`, `name`, `disabled`, `onInput(value, event)`, `onChange(value, event)` |
+| `disclosure` | `label`, `open`, `onToggle(open, event)` |
+| `dialog` | `title`, `onClose(returnValue, event)` |
+| `menu` | `value`, `label`, `onSelect(value, event)`; supply a native `trigger` and `items` at construction |
+| `toolbar` | `label` |
+| `notice`, `badge` | `text`, `tone` |
+| `spinner` | `label` |
 
 Button variants are `primary`, `secondary` (default), `quiet`, and `danger`.
 Status tones are `neutral` (default), `success`, `warning`, and `danger`.
@@ -96,9 +105,9 @@ Common field properties are `label`, `help`, `unit`, `name`, `disabled`,
 native control, with a matching label; other components apply `id` to their root.
 Use unique IDs when providing your own.
 
-Fields expose `input` (the native element), `value`, and `valid`. Text and number
-fields additionally expose `draft` and `commit()`. Commit returns whether the
-draft is valid. Native select values are strings; options accept strings or
+Text, number, select, and checkbox fields expose `input` (the native element),
+`value`, and `valid`. Text and number fields also expose `draft` and `commit()`.
+Commit returns whether the draft is valid. Native select values are strings; options accept strings or
 `{value, label, disabled}` objects. Replacing options retains the selected value
 if it still exists; otherwise it leaves the control unselected.
 
@@ -143,9 +152,89 @@ those rules in an application controller. A single function that maps applicatio
 state to control properties makes success, error, and cancellation paths easier
 to keep consistent.
 
+## Live ranges and controlled choices
+
+`rangeField` exposes its native range input as `input`, its numeric native value
+as `value`, and its displayed value as `output`. `min` and `max` must be finite
+numbers, with `min <= max`; `step` accepts a positive number or `"any"`.
+The browser clamps and rounds values using those bounds and steps. An omitted
+value uses the browser's midpoint. `set` updates the native input silently.
+
+Range fields use live events: `onInput` runs as the slider moves, while
+`onChange` runs on the native change event. They have no draft, blur commit, or
+`commit()` method. This keeps native sliders suitable for immediate previews.
+
+`segmentedControl` takes an immutable `items` array of
+`{value, label, disabled}` choices, with unique nonempty values and at least one
+enabled choice. It exposes its selected `value` and native `buttons`. Arrow keys,
+Home, and End move among enabled buttons. The default control selects before
+calling `onChange`.
+
+Use `controlled: true` when the application may reject a choice. A request calls
+`onChange`; the displayed selection changes only when the application calls
+`set({value})`:
+
+```js
+const precision = segmentedControl({
+  controlled: true,
+  value: 'single',
+  items: [{value: 'single', label: 'Single'}, {value: 'paired', label: 'Paired'}],
+  onChange: value => {
+    if (!settingsAreValid(value)) return;
+    state.precision = value;
+    precision.set({value});
+  },
+});
+```
+
+## Native disclosures, dialogs, and menus
+
+`disclosure` wraps native `details` and `summary` elements. It exposes `open` and
+`summary`, accepts initial `children`, and supports `append`. Programmatic
+`set({open})` updates stay silent; user toggles call `onToggle` after the browser
+dispatches its toggle event.
+
+`dialog` exposes a native dialog through `element`, plus `showModal()`,
+`close(returnValue)`, and an `open` getter. Mount and unhide it before opening.
+Native Escape, focus handling, and `<form method="dialog">` submission still
+apply. Read `element.returnValue` or handle `onClose`. Hiding through `set`
+closes silently. Destroying the component closes it and releases its listeners.
+
+`menu({trigger, items, value, onSelect})` creates and owns a radio-choice menu.
+The native trigger remains caller-owned. `items` use the same choice format as
+segmented controls. The handle exposes `buttons`, `value`, `isOpen`, `open()`, and
+`close(restoreFocus = false)`. Selection updates checked state, closes the menu,
+restores trigger focus, and calls `onSelect`. Programmatic selection is silent.
+Put the trigger and menu inside a `.wui-menu-anchor` or another positioned
+container to place the popup beneath the trigger.
+
+Use `bindMenu` to share interaction with existing native markup:
+
+```js
+const binding = bindMenu({
+  trigger: document.getElementById('download-choice'),
+  element: document.getElementById('download-menu'),
+  container: document.getElementById('download-actions'),
+});
+// Selection policy stays with the application.
+binding.close(true);
+// At teardown, leave the borrowed DOM in place:
+binding.destroy();
+```
+
+The binding reads live menu item roles, checked state, and disabled state. It
+handles opening, arrow keys, Home/End, Escape/Tab, and outside pointer/focus
+events. It does not choose values or attach item click callbacks. Its narrower
+handle exposes `element`, `trigger`, `isOpen`, `open`, `close`, `destroy`, and
+`destroyed`; it has no `set` or `mount`. Disposing a binding closes the popup and
+removes its listeners while preserving borrowed nodes and application listeners.
+Menus and bindings use their original document for outside events. Destroy and
+recreate them after moving their nodes to another document.
+
 ## Composition and lifetime
 
-Panels, rows, and stacks accept initial `children` and expose `append(...children)`.
+Panels, rows, stacks, toolbars, disclosures, and dialogs accept initial `children`
+and expose `append(...children)`.
 Passing a component transfers its ownership to that container. Destroying the
 container recursively destroys its owned components. Appending the child to
 another container transfers ownership; `child.mount(dom_parent)` makes it
@@ -193,6 +282,23 @@ The main tokens are `--ui-background`, `--ui-surface`, `--ui-text`, `--ui-muted`
 The root supplies typography and foreground color; the application chooses where
 to paint its page background. See [ui.css](styles/ui.css) for spacing, control,
 border, and supporting surface tokens.
+
+Spacing uses `--ui-space-1` through `--ui-space-8`, from 4px to 48px. Text roles
+use `--ui-text-xs`, `--ui-text-small`, `--ui-text-body`, `--ui-text-control`,
+`--ui-text-code`, `--ui-text-kicker`, `--ui-text-title`, `--ui-text-heading`, and
+`--ui-text-hero`. Components use these shared values for their default rhythm.
+Use role classes such as `.wui-page-title`, `.wui-heading`, `.wui-subtitle`,
+`.wui-kicker`, `.wui-caption`, and `.wui-label` for native app markup. Shared
+`.wui-table`, `.wui-nav`, `.wui-actions`, `.wui-notice`, `.wui-disclosure`, and
+`.wui-range` classes also support native nodes whose state the application owns.
+
+Use `data-size="small"` on segmented controls and inputs for a smaller variant,
+`data-width="full"` on inputs for a full-width field, and
+`data-variant="attached"` on `.wui-tabs` for equal-width tabs attached to panels.
+These variants keep control presentation in the library while applications
+choose their page composition.
+Native `.wui-button` toggles can use `data-tone="warning"` with
+`aria-pressed="true"` for a selected warning-colored treatment.
 
 Theme identity and mode are separate. The bundled theme is named `default` and
 provides both `light` and `dark` modes. A theme added later must provide both
@@ -277,10 +383,10 @@ It does not select or save a theme. Moving the whole root retains palette
 subscriptions. Moving an individual renderer between roots requires subscribing
 to the new root.
 
-The library makes no font requests. Its font stacks prefer Biolinum, Libertine,
-and Fira Code when available, with system fallbacks. The gallery optionally loads
-pinned fonts from a CDN through [fonts.css](examples/fonts.css); omit that file
-or self-host the fonts for an offline deployment.
+The main stylesheet makes no font requests. Its stacks prefer Biolinum,
+Libertine, and Fira Code when available, with system fallbacks. Load optional
+[styles/fonts.css](styles/fonts.css) to use the shared pinned CDN font sources;
+the gallery uses that same file. Omit it or self-host the fonts for offline use.
 
 ## Distribution and checks
 
@@ -312,6 +418,8 @@ The page at `tests/index.html` can also run directly in a browser.
 Checks cover numeric parsing, draft/commit behavior, native form validity, silent
 updates, keyboard tabs, focus, ownership transfer, disposal, independent theme
 roots, saved and blocked storage, theme toggles, prepaint restoration, and
-controls/palette subscriptions moving between documents. The gallery
+controls/palette subscriptions moving between documents. They also cover
+controlled selection, live ranges, native disclosure/dialog behavior, menu
+keyboard navigation, and borrowed-node disposal. The gallery
 also needs visual checks at desktop and narrow widths. These checks do not
 establish browser-wide accessibility certification or solver integration.

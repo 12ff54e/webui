@@ -1,0 +1,4 @@
+/* Optional shared fonts. Components also work with local system fallbacks. */
+@font-face { font-family: 'Linux Biolinum'; font-style: normal; font-weight: 400; font-display: swap; src: url('https://cdn.jsdelivr.net/npm/@typopro/web-linux-biolinum@3.7.5/TypoPRO-LinuxBiolinum-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'Linux Libertine'; font-style: normal; font-weight: 400; font-display: swap; src: url('https://cdn.jsdelivr.net/npm/@typopro/web-linux-libertine@3.7.5/TypoPRO-LinuxLibertine-Regular.ttf') format('truetype'); }
+@font-face { font-family: 'Fira Code'; font-style: normal; font-weight: 300 700; font-display: swap; src: url('https://cdn.jsdelivr.net/npm/firacode@6.2.0/distr/woff2/FiraCode-VF.woff2') format('woff2'); }
