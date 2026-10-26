@@ -1,12 +1,13 @@
 {
   "name": "webui",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Small browser-native components for scientific web applications",
   "exports": {
     ".": "./src/index.js",
-    "./style.css": "./styles/ui.css"
+    "./style.css": "./styles/ui.css",
+    "./theme_boot.js": "./src/theme_boot.js"
   },
   "scripts": {
     "test": "node --test tests/*.test.mjs",

@@ -6,8 +6,9 @@ them explicitly. Applications own their state, scientific rules, workers, and
 renderers.
 
 The library uses native browser elements, ES modules, and a separate stylesheet.
-It has no runtime dependencies or required build step. Version 0.1.0 ships one
-light theme. Theme switching and persistence are deferred.
+It has no runtime dependencies or required build step. Version 0.2.0 includes a
+default theme with light and dark modes, a shared mode switch, and optional saved
+preferences.
 
 ## Start
 
@@ -75,6 +76,7 @@ changes to those properties.
 | Factory | Properties supported by construction and `set` |
 | --- | --- |
 | `button` | `label`, `variant`, `disabled`, `onClick(event)` |
+| `themeToggle` | `label`, `disabled`; pass a theme controller as `theme` at construction |
 | `status` | `text`, `tone` |
 | `panel` | `title`, `description` |
 | `row`, `stack` | `gap` |
@@ -171,7 +173,7 @@ their fields. Programmatic selection is silent and restores focus to the new tab
 if it would otherwise remain in hidden content. Panels should hold content that
 can be shown without waiting for a new computation.
 
-## Styles and future themes
+## Styles and themes
 
 All library selectors stay within `.wui`. Defaults are defined on each root, so
 multiple roots can have independent tokens. Set `data-density="compact"` on a
@@ -186,11 +188,69 @@ Override a small set of semantic tokens instead of patching component internals:
 ```
 
 The main tokens are `--ui-background`, `--ui-surface`, `--ui-text`, `--ui-muted`,
-`--ui-accent`, `--ui-warning`, `--ui-danger`, `--ui-line`, the three
+`--ui-accent`, `--ui-warning`, `--ui-danger`, `--ui-line`, `--ui-grid`, the five
 `--ui-plot-N` colors, and `--ui-font`, `--ui-serif`, and `--ui-mono`.
 The root supplies typography and foreground color; the application chooses where
 to paint its page background. See [ui.css](styles/ui.css) for spacing, control,
 border, and supporting surface tokens.
+
+Theme identity and mode are separate. The bundled theme is named `default` and
+provides both `light` and `dark` modes. A theme added later must provide both
+palettes; selecting other themes remains deferred. Each root defaults to the
+light palette. `data-theme="default" data-mode="dark"` selects dark mode, while
+nested roots keep their own mode. The controller owns these attributes and
+notifies renderers when the mode changes:
+
+```js
+import {createTheme, themeToggle} from './webui/src/index.js';
+
+const theme = createTheme({root: document.documentElement,
+  theme: 'default', storageKey: 'my-app.mode.v1', defaultMode: 'light'});
+const toggle = themeToggle({theme}).mount(document.getElementById('toolbar'));
+theme.setMode('dark');
+theme.setMode('light', {persist: false}); // For a temporary host-supplied mode.
+theme.toggleMode();
+console.log(theme.name, theme.mode); // 'default', then 'light' or 'dark'
+// At teardown:
+toggle.destroy();
+theme.destroy();
+```
+
+`themeToggle` supplies a circular native button, a split light/dark icon, and the
+stable accessible label "Dark mode". It manages `aria-pressed` and follows the
+controller when the mode changes. Its optional `label` replaces the accessible
+label and tooltip. It supports the usual component methods, including silent
+disabled/hidden updates and disposal; destroying it leaves the controller active.
+For custom markup, `theme.bindToggle(button)` returns a binding disposer.
+Destroying the controller removes all bindings and its storage listener while
+leaving the DOM and mode in place. Later controller updates throw.
+
+Persistence is opt-in: omit `storageKey` to avoid storage access. With a key,
+initial mode uses a valid saved value, then `defaultMode`; existing root
+attributes do not override that choice. Invalid saved values and storage clears
+use the default. `setMode` accepts only `light` or `dark`. It saves by default,
+even when the mode already matches, and emits one
+notification per change. Storage notifications from the same key and storage
+area update the theme without writing back. Denied storage access leaves theme
+changes available. The controller uses the root's document at construction;
+destroy and recreate it if the root moves to another document. System theme
+selection is not automatic.
+
+To restore a document theme before the first paint, put the optional classic
+helper before stylesheets and use the same key and default in the controller:
+
+```html
+<html class="wui" data-theme="default">
+<head>
+  <script src="./webui/src/theme_boot.js"
+    data-storage-key="my-app.mode.v1" data-default-mode="light"></script>
+  <link rel="stylesheet" href="./webui/styles/ui.css">
+</head>
+```
+
+The helper sets the root's theme identity to `default` and restores its mode.
+It uses a valid saved preference or the given default, and falls back to light
+when no default is given. It creates no controller or global API.
 
 Canvas and GPU renderers can read the same palette:
 
@@ -206,17 +266,16 @@ unsubscribe();
 ```
 
 `palette(element)` returns `background`, `surface`, `text`, `muted`, `accent`,
-`warning`, `danger`, `line`, `plot1`, `plot2`, `plot3`, `font`, and `mono`.
+`warning`, `danger`, `line`, `grid`, `plot1` through `plot5`, `font`, and `mono`.
 Palette colors must be six-digit sRGB hex strings, to support existing scientific
 renderers. CSS tokens remain the source of truth. Read them after the stylesheet
 loads and the element inherits from a root.
 
 `onThemeChange` calls its callback immediately and returns a disposer.
-`refreshTheme` notifies subscribers on that root. It does not change the theme,
-watch DOM changes, or persist settings. Moving the whole root retains its
+`refreshTheme` notifies subscribers on that root after application token changes.
+It does not select or save a theme. Moving the whole root retains palette
 subscriptions. Moving an individual renderer between roots requires subscribing
-to the new root. Alternate palettes, a selector, and saved/system preferences can
-be added later without changing component construction.
+to the new root.
 
 The library makes no font requests. Its font stacks prefer Biolinum, Libertine,
 and Fira Code when available, with system fallbacks. The gallery optionally loads
@@ -251,7 +310,8 @@ that tab on completion. It does not launch a browser or change its profile.
 The page at `tests/index.html` can also run directly in a browser.
 
 Checks cover numeric parsing, draft/commit behavior, native form validity, silent
-updates, keyboard tabs, focus, ownership transfer, disposal, independently styled
-roots, and controls/theme subscriptions moving between documents. The gallery
+updates, keyboard tabs, focus, ownership transfer, disposal, independent theme
+roots, saved and blocked storage, theme toggles, prepaint restoration, and
+controls/palette subscriptions moving between documents. The gallery
 also needs visual checks at desktop and narrow widths. These checks do not
 establish browser-wide accessibility certification or solver integration.

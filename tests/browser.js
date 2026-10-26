@@ -1,5 +1,6 @@
 import {button, panel, row, stack, status, tabs, numberField, palette, onThemeChange, refreshTheme} from '../src/index.js';
 import {test_fields} from './fields-browser.js';
+import {test_themes} from './themes-browser.js';
 
 export async function run() {
     const results = [];
@@ -126,5 +127,6 @@ export async function run() {
         equal(calls, 30);
     });
     await test_fields({test, assert, equal, root});
+    await test_themes({test, assert, equal, root});
     return {pass: results.every(result => result.pass), results};
 }

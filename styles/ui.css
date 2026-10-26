@@ -9,13 +9,17 @@
     --ui-warning: #a55b32;
     --ui-danger: #a64049;
     --ui-line: #d7dfd4;
+    --ui-grid: #e2e7dd;
     --ui-plot-1: #176c59;
     --ui-plot-2: #557aa3;
     --ui-plot-3: #b16a40;
+    --ui-plot-4: #a94776;
+    --ui-plot-5: #a65338;
     --ui-soft: #edf2e9;
     --ui-danger-soft: #fbefed;
     --ui-warning-soft: #faf1e5;
     --ui-on-accent: #ffffff;
+    --ui-shadow: 0 3px 16px #243d3605;
     --ui-font: 'Linux Biolinum', 'Segoe UI', system-ui, sans-serif;
     --ui-serif: 'Linux Libertine', Georgia, serif;
     --ui-mono: 'Fira Code', 'SFMono-Regular', Consolas, monospace;
@@ -30,6 +34,29 @@
     color: var(--ui-text);
     font: 16px/1.5 var(--ui-font);
     text-rendering: optimizeLegibility;
+}
+
+.wui[data-theme='default'][data-mode='dark'] {
+    color-scheme: dark;
+    --ui-background: #141e1a;
+    --ui-surface: #1b2821;
+    --ui-text: #e4ece2;
+    --ui-muted: #a8b9ae;
+    --ui-accent: #8bd0b0;
+    --ui-warning: #e9ab83;
+    --ui-danger: #f0a0a5;
+    --ui-line: #384b3f;
+    --ui-grid: #2b3c31;
+    --ui-plot-1: #8bd0b0;
+    --ui-plot-2: #a5bce7;
+    --ui-plot-3: #e9ab83;
+    --ui-plot-4: #ed88b8;
+    --ui-plot-5: #edab81;
+    --ui-soft: #293f31;
+    --ui-danger-soft: #3d292d;
+    --ui-warning-soft: #3e3327;
+    --ui-on-accent: #15291e;
+    --ui-shadow: 0 3px 16px #00000012;
 }
 
 .wui[data-density='compact'] {
@@ -78,6 +105,15 @@
 .wui .wui-button[data-variant='danger'] { color: var(--ui-danger); border-color: var(--ui-danger); }
 .wui .wui-button[data-variant='danger']:hover:enabled { background: var(--ui-danger-soft); }
 .wui .wui-button:disabled { opacity: .48; cursor: not-allowed; }
+.wui .wui-theme-toggle {
+    flex: 0 0 auto;
+    width: var(--ui-control-height);
+    height: var(--ui-control-height);
+    padding: 0;
+    border-radius: 50%;
+}
+.wui .wui-theme-toggle svg { display: block; width: 20px; height: 20px; }
+.wui .wui-theme-toggle[aria-pressed='true'] { color: var(--ui-accent); background: var(--ui-soft); }
 
 .wui .wui-field { display: flex; flex-direction: column; gap: var(--ui-field-gap); min-width: 0; }
 .wui .wui-field-label { display: block; color: var(--ui-text); font-size: .94em; line-height: 1.4; }

@@ -1,4 +1,7 @@
-import {button, numberField, selectField, checkbox, panel, stack, row, status, tabs} from '../src/index.js';
+import {button, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle} from '../src/index.js';
+
+const theme = createTheme({storageKey: 'webui.gallery.theme.v1'});
+themeToggle({theme, id: 'gallery-theme-toggle'}).mount(document.getElementById('gallery-theme-host'));
 
 function element(tag, class_name, text) {
     const node = document.createElement(tag);

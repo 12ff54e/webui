@@ -11,6 +11,7 @@
 .gallery-mark i:nth-child(2) { inset: 3px 6px; }.gallery-mark i:nth-child(3) { inset: 0 12px; }
 .gallery-header nav { display: flex; gap: 32px; font-size: 15px; color: var(--ui-muted); }
 .gallery-header nav a:hover { color: var(--ui-accent); }
+.gallery-header-actions { display: flex; align-items: center; gap: 20px; }
 .gallery-version { color: var(--ui-muted); font: 10px/1.5 var(--ui-mono); text-transform: uppercase; letter-spacing: .07em; }
 .gallery-version > span { margin-inline: 5px; color: var(--ui-line); }
 .gallery-intro { display: grid; grid-template-columns: 1.4fr .65fr; align-items: center; gap: 90px; padding-block: 82px 88px; }
@@ -26,7 +27,7 @@
 .gallery-type-sample > span { font: 112px/.9 var(--ui-serif); letter-spacing: -9px; }
 .gallery-type-sample > small { color: var(--ui-warning); font: 25px/1 var(--ui-serif); letter-spacing: 4px; }
 .gallery-swatch-strip { display: flex; height: 26px; margin-block: 12px 22px; }
-.gallery-swatch-strip i { flex: 1; background: var(--ui-accent); }.gallery-swatch-strip i:nth-child(2) { background: #b16a40; }.gallery-swatch-strip i:nth-child(3) { background: #d5ded0; }.gallery-swatch-strip i:nth-child(4) { background: #eae9df; }
+.gallery-swatch-strip i { flex: 1; background: var(--ui-accent); }.gallery-swatch-strip i:nth-child(2) { background: var(--ui-plot-3); }.gallery-swatch-strip i:nth-child(3) { background: var(--ui-line); }.gallery-swatch-strip i:nth-child(4) { background: var(--ui-soft); }
 .gallery-foundation > span { color: var(--ui-muted); font: 9px/1.4 var(--ui-mono); text-transform: uppercase; letter-spacing: .1em; }
 .gallery-foundation p { margin: 9px 0 0; font-size: 16px; line-height: 1.55; }
 .gallery-section { padding-block: 42px 56px; border-top: 1px solid var(--ui-line); scroll-margin-top: 20px; }
@@ -66,7 +67,7 @@
 }
 @media (max-width: 650px) {
     .gallery-width { width: calc(100% - 36px); }
-    .gallery-header { min-height: 83px; gap: 18px; }.gallery-header nav { gap: 17px; font-size: 13px; }.gallery-version { display: none; }
+    .gallery-header { min-height: 83px; flex-wrap: wrap; gap: 18px; padding-block: 20px; }.gallery-header nav { order: 3; flex-basis: 100%; justify-content: space-between; gap: 17px; font-size: 13px; }.gallery-version { display: none; }
     .gallery-intro { grid-template-columns: 1fr; gap: 40px; padding-block: 48px; }
     .gallery h1 { font-size: 58px; letter-spacing: -1.8px; }.gallery-lead { font-size: 18px; }
     .gallery-identity { justify-self: start; max-width: none; display: grid; grid-template-columns: 110px 1fr; column-gap: 24px; padding: 0; }

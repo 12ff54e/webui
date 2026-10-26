@@ -12,6 +12,9 @@ try {
     const call = (name, params = {}) => cdp.call(name, params, session);
     await call('Page.enable');
     await call('Runtime.enable');
+    // Keep saved-theme fixtures within this disposable tab.
+    await call('Page.addScriptToEvaluateOnNewDocument', {source:
+        `Object.defineProperty(window, 'localStorage', {get: () => window.sessionStorage});`});
     const errors = [];
     const off = cdp.on('Runtime.exceptionThrown', (event, id) => {
         if (id === session) errors.push(event.exceptionDetails.exception?.description ?? event.exceptionDetails.text);
