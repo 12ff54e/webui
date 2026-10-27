@@ -12,6 +12,8 @@ try {
     const call = (name, params = {}) => cdp.call(name, params, session);
     await call('Page.enable');
     await call('Runtime.enable');
+    await call('Network.enable');
+    await call('Network.setCacheDisabled', {cacheDisabled: true});
     // Keep saved-theme fixtures within this disposable tab.
     await call('Page.addScriptToEvaluateOnNewDocument', {source:
         `Object.defineProperty(window, 'localStorage', {get: () => window.sessionStorage});`});
