@@ -4,11 +4,18 @@
 .gallery-skip { position: fixed; top: -100px; left: 20px; z-index: 10; padding: 12px 18px; background: var(--ui-accent); color: var(--ui-on-accent) !important; }
 .gallery-skip:focus { top: 16px; }
 .gallery-header { display: flex; align-items: center; justify-content: space-between; gap: 32px; min-height: 104px; border-bottom: 1px solid var(--ui-line); }
-.gallery-brand { display: inline-flex; align-items: center; gap: 12px; font: 31px/1 var(--ui-serif); letter-spacing: -1.2px; }
-.gallery-brand-suffix { color: var(--ui-muted); }
-.gallery-mark { position: relative; display: block; width: 31px; height: 35px; transform: rotate(-28deg); }
-.gallery-mark i { position: absolute; inset: 8px 0; border: 1px solid var(--ui-accent); border-radius: 50%; }
-.gallery-mark i:nth-child(2) { inset: 3px 6px; }.gallery-mark i:nth-child(3) { inset: 0 12px; }
+.wui :is(.gallery-brand, .gallery-footer-name) { display: inline-flex; flex: 0 0 auto; padding: 5px 8px; margin-inline-start: -8px; border-radius: 4px; }
+.wui .gallery-wordmark {
+    display: block;
+    /* Fixed dark shades of Celadon green and Sorghum red. */
+    --wui-logo-w: #0c362d;
+    --wui-logo-ui: #4d1216;
+}
+/* Dark mode uses the other two palettes: Cloisonné blue and Gromwell purple. */
+.wui[data-mode='dark'] .gallery-wordmark {
+    --wui-logo-w: #82bdeb;
+    --wui-logo-ui: #c7a3df;
+}
 .gallery-header nav { display: flex; gap: 32px; font-size: 15px; color: var(--ui-muted); }
 .gallery-header nav a:hover { color: var(--ui-accent); }
 .gallery-header-actions { display: flex; align-items: center; gap: 20px; }
@@ -51,7 +58,7 @@
 .gallery-principles { display: grid; grid-template-columns: 1fr 1.15fr; gap: 80px; padding-block: 58px 68px; }
 .gallery-principles h2 { font-size: 43px; }.gallery-principles-lead { max-width: 290px; margin: 22px 0 0; color: var(--ui-muted); font-size: 16px; line-height: 1.7; }
 .gallery-principles dl { margin: 0; }.gallery-principles dl > div { padding-block: 19px; border-top: 1px solid var(--ui-line); }.gallery-principles dl > div:first-child { padding-top: 0; border-top: 0; }.gallery-principles dt { font-size: 18px; }.gallery-principles dt span { display: inline-block; width: 36px; color: var(--ui-accent); font: 10px var(--ui-mono); vertical-align: middle; }.gallery-principles dd { margin: 8px 0 0 36px; max-width: 390px; color: var(--ui-muted); font-size: 15px; line-height: 1.7; }
-.gallery-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-block: 26px 32px; border-top: 1px solid var(--ui-line); color: var(--ui-muted); font-size: 12px; }.gallery-footer-name { color: var(--ui-text); font: 23px var(--ui-serif); }.gallery-footer a { padding-bottom: 2px; border-bottom: 1px solid var(--ui-line); }
+.gallery-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-block: 26px 32px; border-top: 1px solid var(--ui-line); color: var(--ui-muted); font-size: 12px; }.gallery-footer a { padding-bottom: 2px; border-bottom: 1px solid var(--ui-line); }
 
 @media (max-width: 900px) {
     .gallery-width { width: calc(100% - 56px); }
