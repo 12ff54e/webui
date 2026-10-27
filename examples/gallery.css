@@ -54,6 +54,8 @@
 .gallery-readout { display: grid; grid-template-columns: auto 1fr; gap: 8px 18px; margin: 22px 0 0; font-size: 13px; }
 .gallery-readout dt { color: var(--ui-muted); }.gallery-readout dd { margin: 0; overflow-wrap: anywhere; font-family: var(--ui-mono); font-size: 11px; }
 .gallery-component-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.wui .gallery-math-demo { grid-column: 1 / -1; min-width: 0; }
+.wui .gallery-math-source .wui-input { font-family: var(--ui-mono); font-size: var(--ui-text-code); }
 .gallery-component-caption { margin: 0; color: var(--ui-muted); font-size: 13px; line-height: 1.6; }
 .gallery-principles { display: grid; grid-template-columns: 1fr 1.15fr; gap: 80px; padding-block: 58px 68px; }
 .gallery-principles h2 { font-size: 43px; }.gallery-principles-lead { max-width: 290px; margin: 22px 0 0; color: var(--ui-muted); font-size: 16px; line-height: 1.7; }

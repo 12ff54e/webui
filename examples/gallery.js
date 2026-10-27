@@ -1,5 +1,6 @@
-import {button, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle, themePicker,
+import {button, textField, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle, themePicker,
     segmentedControl, rangeField, disclosure, dialog, menu, toolbar, notice, badge, spinner} from '../src/index.js';
+import {math} from '../src/math.js';
 
 const theme = createTheme({theme: document.documentElement.dataset.theme, storageKey: 'webui.gallery.theme.v1'});
 themeToggle({theme, id: 'gallery-theme-toggle'}).mount(document.getElementById('gallery-theme-host'));
@@ -211,5 +212,25 @@ panel({title: 'Menus and dialogs', description: 'Native interaction with shared 
     children: [stack({children: [toolbar({label: 'Example actions', children: [format_anchor, open_dialog]}),
         row({gap: 'small', children: [format_badge, activity, activity_badge, toggle_activity]}), overlay_notice, confirmation]})]})
     .mount(document.getElementById('overlays-host'));
+
+const equations = {
+    equilibrium: String.raw`\nabla \cdot \mathbf{B} = 0, \qquad \mathbf{J} \times \mathbf{B} = \nabla p`,
+    roots: String.raw`x_{\pm} = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}`,
+    matrix: String.raw`\begin{pmatrix} a & b \\ c & d \end{pmatrix}^{-1} = \frac{1}{ad-bc}\begin{pmatrix} d & -b \\ -c & a \end{pmatrix}`,
+};
+const expression = math({id: 'gallery-equation', tex: equations.equilibrium, displayMode: true});
+const expression_source = textField({id: 'gallery-equation-source', label: 'TeX expression', value: equations.equilibrium,
+    help: 'Edit the expression, then press Enter or leave the field.',
+    onCommit: value => expression.set({tex: value})});
+expression_source.element.classList.add('gallery-math-source');
+const inline_example = element('p', 'gallery-component-caption');
+const inline_expression = math({tex: String.raw`\mathbf{B} = \nabla \times \mathbf{A}`});
+inline_example.append('Inline math follows the text: ', inline_expression.element, '.');
+panel({title: 'Mathematical expressions', description: 'Inline symbols and display equations.', children: [
+    stack({children: [inline_example, segmentedControl({label: 'Example equation', value: 'equilibrium', items: [
+        {value: 'equilibrium', label: 'Equilibrium'}, {value: 'roots', label: 'Roots'}, {value: 'matrix', label: 'Matrix'},
+    ], onChange: value => { expression.set({tex: equations[value]}); expression_source.set({value: equations[value]}); }}),
+    expression, expression_source]}),
+]}).mount(document.getElementById('math-host'));
 
 document.body.dataset.gallery = 'ready';

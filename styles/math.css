@@ -1,0 +1,10 @@
+@import url('../vendor/katex/katex.css');
+
+/* Restore KaTeX's default box model without overriding its explicit boxes. */
+.wui :where(.wui-math .katex, .wui-math .katex *) { box-sizing: content-box; }
+.wui .wui-math { color: inherit; }
+.wui .wui-math[data-display='true'] { display: block; min-width: 0; max-width: 100%; overflow-x: auto; padding-block: .125em; }
+.wui .wui-math > .katex-display { margin: var(--ui-space-3) 0; }
+/* Wide equations scroll from the left; short equations remain centered. */
+.wui .wui-math > .katex-display > .katex { min-width: max-content; }
+.wui .wui-math[data-error='true'] { color: var(--ui-danger); font: var(--ui-text-code)/var(--ui-leading) var(--ui-mono); white-space: pre-wrap; overflow-wrap: anywhere; }

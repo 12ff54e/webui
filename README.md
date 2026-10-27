@@ -6,9 +6,10 @@ them explicitly. Applications own their state, scientific rules, workers, and
 renderers.
 
 The library uses native browser elements, ES modules, and a separate stylesheet.
-It has no runtime dependencies or required build step. It supplies shared
+The core has no runtime dependencies or required build step. It supplies shared
 controls, typography and spacing, and themes with light and dark modes.
-Applications can save mode preferences when needed.
+Applications can save mode preferences when needed. Optional math rendering uses
+a bundled copy of KaTeX, including its stylesheet and fonts.
 
 ## Start
 
@@ -95,6 +96,7 @@ changes to those properties.
 | `toolbar` | `label` |
 | `notice`, `badge` | `text`, `tone` |
 | `spinner` | `label` |
+| `math` (from `src/math.js`) | `tex`, `displayMode`, `macros` |
 
 Button variants are `primary`, `secondary` (default), `quiet`, and `danger`.
 Status tones are `neutral` (default), `success`, `warning`, and `danger`.
@@ -231,6 +233,51 @@ handle exposes `element`, `trigger`, `isOpen`, `open`, `close`, `destroy`, and
 removes its listeners while preserving borrowed nodes and application listeners.
 Menus and bindings use their original document for outside events. Destroy and
 recreate them after moving their nodes to another document.
+
+## Math expressions
+
+Import `math` from the optional `src/math.js` entry point and load `styles/math.css`
+after `styles/ui.css`. Copy `vendor/` alongside `src/` and `styles/` when deploying
+math. The renderer, CSS, and fonts all load from local files; no CDN, package
+installation, or build step is required.
+
+```html
+<link rel="stylesheet" href="./webui/styles/ui.css">
+<link rel="stylesheet" href="./webui/styles/math.css">
+<div class="wui" id="equation"></div>
+<script type="module">
+  import {math} from './webui/src/math.js';
+
+  const equation = math({
+    tex: String.raw`x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}`,
+    displayMode: true,
+  }).mount(document.getElementById('equation'));
+
+  equation.set({tex: String.raw`\nabla \cdot \mathbf{B} = 0`});
+</script>
+```
+
+`tex` is a TeX string without `$` or `$$` delimiters. The default is inline math;
+use `displayMode: true` for a centered equation that scrolls when it is too wide.
+Inline components can be mounted in a paragraph or label. The component keeps
+its root when updated or moved. Unchanged and hidden-only updates also keep the
+rendered children. HTML and MathML output provide visual and accessible math.
+
+The handle exposes read-only `tex`, `displayMode`, and `error` getters. Invalid
+TeX appears as literal text in the theme's error color, with a plain-text error
+message in `error` and the element's `title`. A valid update clears the error.
+Invalid option types throw before changing the component.
+
+`macros` accepts string expansions such as `{'\\R': '\\mathbb{R}'}`. Definitions
+are copied; commands inside an expression cannot change another expression or
+the caller's object. Trusted HTML and external-resource commands are disabled.
+Macro expansion is limited to 1,000 steps and user-specified dimensions to 20em.
+
+Package consumers can import `webui/math` and `webui/math.css`. The core entry
+point does not load KaTeX. The pinned version and reproduction instructions are
+in [vendor/katex/README.txt](vendor/katex/README.txt); its license ships with the
+files. See the [KaTeX function reference](https://katex.org/docs/supported) for
+supported notation.
 
 ## Composition and lifetime
 
@@ -440,7 +487,8 @@ the gallery uses that same file. Omit it or self-host the fonts for offline use.
 ## Distribution and checks
 
 Keep each application on a pinned library revision. Copy the complete `src/`
-module graph and `styles/` together. A versioned asset directory is the simplest
+module graph and `styles/` together; include `vendor/` for math rendering.
+A versioned asset directory is the simplest
 way to invalidate all imported modules and CSS at once. Changing only an entry
 script's query string does not version its imports.
 
@@ -456,7 +504,8 @@ node scripts/build.mjs
 node scripts/test-browser.mjs http://localhost:6969/magnetic-equilibrium-solver/webui/tests/
 ```
 
-The optional build copies the runtime, styles, and gallery to ignored `build/`.
+The optional build copies the runtime, styles, bundled KaTeX files, and gallery
+to ignored `build/`.
 Serve `build/examples/index.html` to check the staged package.
 
 The browser runner uses an existing Chrome CDP connection at `localhost:9333`;
@@ -469,6 +518,7 @@ updates, keyboard tabs, focus, ownership transfer, disposal, independent theme
 roots, saved and blocked storage, theme toggles, prepaint restoration, and
 controls/palette subscriptions moving between documents. They also cover
 controlled selection, live ranges, native disclosure/dialog behavior, menu
-keyboard navigation, and borrowed-node disposal. The gallery
+keyboard navigation, borrowed-node disposal, TeX rendering and error recovery,
+macro isolation, local math fonts, and math moving between documents. The gallery
 also needs visual checks at desktop and narrow widths. These checks do not
 establish browser-wide accessibility certification or solver integration.
