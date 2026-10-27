@@ -1,4 +1,6 @@
 /* webui themes. Colors consumed by renderers use six-digit sRGB hex. */
+/* Plot 1–4 keep the blue, amber, green, orange-red series order in every mode.
+   Plot 5 is retained for existing consumers outside that four-color cycle. */
 .wui {
     color-scheme: light;
     --ui-background: #f7f7f1;
@@ -10,10 +12,10 @@
     --ui-danger: #a64049;
     --ui-line: #d7dfd4;
     --ui-grid: #e2e7dd;
-    --ui-plot-1: #176c59;
-    --ui-plot-2: #557aa3;
-    --ui-plot-3: #b16a40;
-    --ui-plot-4: #a94776;
+    --ui-plot-1: #3994c0;
+    --ui-plot-2: #b88022;
+    --ui-plot-3: #609a33;
+    --ui-plot-4: #d66339;
     --ui-plot-5: #a65338;
     --ui-soft: #edf2e9;
     --ui-danger-soft: #fbefed;
@@ -73,10 +75,10 @@
     --ui-danger: #f0a0a5;
     --ui-line: #384b3f;
     --ui-grid: #2b3c31;
-    --ui-plot-1: #8bd0b0;
-    --ui-plot-2: #a5bce7;
-    --ui-plot-3: #e9ab83;
-    --ui-plot-4: #ed88b8;
+    --ui-plot-1: #57a8cf;
+    --ui-plot-2: #eaad46;
+    --ui-plot-3: #84bc54;
+    --ui-plot-4: #e47c54;
     --ui-plot-5: #edab81;
     --ui-soft: #293f31;
     --ui-danger-soft: #3d292d;
@@ -97,10 +99,10 @@
     --ui-danger: #ae3f4b;
     --ui-line: #d1dce5;
     --ui-grid: #dce5ed;
-    --ui-plot-1: #2775b6;
-    --ui-plot-2: #6e5a9e;
-    --ui-plot-3: #936723;
-    --ui-plot-4: #9a496f;
+    --ui-plot-1: #3a93c7;
+    --ui-plot-2: #b8802a;
+    --ui-plot-3: #619a3b;
+    --ui-plot-4: #d76442;
     --ui-plot-5: #237471;
     --ui-soft: #f3f7fb;
     --ui-danger-soft: #faedf0;
@@ -121,10 +123,10 @@
     --ui-danger: #f0a3ac;
     --ui-line: #354e66;
     --ui-grid: #293f54;
-    --ui-plot-1: #82bdeb;
-    --ui-plot-2: #b9a9e5;
-    --ui-plot-3: #e4bb74;
-    --ui-plot-4: #e1a0c0;
+    --ui-plot-1: #57a6d4;
+    --ui-plot-2: #e9ab4c;
+    --ui-plot-3: #83bb5a;
+    --ui-plot-4: #e47a5a;
     --ui-plot-5: #8acac5;
     --ui-soft: #233d55;
     --ui-danger-soft: #412c38;
@@ -146,10 +148,10 @@
     --ui-danger: #96375d;
     --ui-line: #e4d3ca;
     --ui-grid: #eee1d8;
-    --ui-plot-1: #c02c38;
-    --ui-plot-2: #34736b;
-    --ui-plot-3: #906328;
-    --ui-plot-4: #775a91;
+    --ui-plot-1: #4a8ebd;
+    --ui-plot-2: #c47a20;
+    --ui-plot-3: #719631;
+    --ui-plot-4: #e75d35;
     --ui-plot-5: #a4512d;
     --ui-soft: #f7e7df;
     --ui-danger-soft: #f9e7ef;
@@ -170,10 +172,10 @@
     --ui-danger: #f0a3ca;
     --ui-line: #584044;
     --ui-grid: #443034;
-    --ui-plot-1: #f48f93;
-    --ui-plot-2: #8bc8b0;
-    --ui-plot-3: #e7bc7a;
-    --ui-plot-4: #9ebae5;
+    --ui-plot-1: #61a2cc;
+    --ui-plot-2: #f3a744;
+    --ui-plot-3: #8db752;
+    --ui-plot-4: #ee7652;
     --ui-plot-5: #ecaa84;
     --ui-soft: #4a2c31;
     --ui-danger-soft: #472638;
@@ -195,10 +197,10 @@
     --ui-danger: #a13f59;
     --ui-line: #dfd3e3;
     --ui-grid: #eae0ee;
-    --ui-plot-1: #5d3a6f;
-    --ui-plot-2: #39716d;
-    --ui-plot-3: #8a6428;
-    --ui-plot-4: #a34e61;
+    --ui-plot-1: #4090c3;
+    --ui-plot-2: #be7c24;
+    --ui-plot-3: #689736;
+    --ui-plot-4: #dd5e3b;
     --ui-plot-5: #3e6898;
     --ui-soft: #eee5f2;
     --ui-danger-soft: #f9e9ef;
@@ -219,10 +221,10 @@
     --ui-danger: #f0a3ba;
     --ui-line: #4c3d59;
     --ui-grid: #3b2e47;
-    --ui-plot-1: #c7a3df;
-    --ui-plot-2: #8cc9bd;
-    --ui-plot-3: #e6bd79;
-    --ui-plot-4: #eca5bc;
+    --ui-plot-1: #5da4d3;
+    --ui-plot-2: #efa94b;
+    --ui-plot-3: #89b858;
+    --ui-plot-4: #ea7858;
     --ui-plot-5: #a0bfe9;
     --ui-soft: #3b2b48;
     --ui-danger-soft: #432b3d;

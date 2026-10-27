@@ -1,4 +1,4 @@
-import {createTheme, themeToggle, themePicker, palette, onThemeChange} from '../src/theme.js';
+import {createTheme, themeToggle, themePicker, palette, onThemeChange, refreshTheme} from '../src/theme.js';
 
 export async function test_themes({test, assert, equal, root}) {
     const theme_root = (parent = root) => {
@@ -25,7 +25,7 @@ export async function test_themes({test, assert, equal, root}) {
             equal(first.name, 'default'); equal(outer.dataset.theme, 'default');
             const dark = palette(outer);
             equal(dark.background, '#141e1a'); equal(dark.grid, '#2b3c31');
-            equal(dark.plot4, '#ed88b8'); equal(dark.plot5, '#edab81');
+            assert(dark.plot4 !== light.plot4); equal(dark.plot5, '#edab81');
             equal(palette(inner).background, light.background);
             assert(dark.text !== light.text && dark.accent !== light.accent);
             second.setMode('dark'); first.setMode('light');
@@ -52,6 +52,54 @@ export async function test_themes({test, assert, equal, root}) {
         const a = luminance(foreground), b = luminance(background);
         return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
     };
+    const series_colors = colors => [colors.plot1, colors.plot2, colors.plot3, colors.plot4];
+    const hue = hex => {
+        const [r, g, b] = hex.slice(1).match(/../g).map(value => parseInt(value, 16) / 255);
+        const high = Math.max(r, g, b), span = high - Math.min(r, g, b);
+        if (!span) return NaN;
+        const sector = high === r ? (g - b) / span : high === g ? (b - r) / span + 2 : (r - g) / span + 4;
+        return (sector * 60 + 360) % 360;
+    };
+    const base_hues = ['#3d99cc', '#f29f24', '#74b235', '#eb6235'].map(hue);
+    const plot_palettes = [];
+    for (const {id, name} of [{id: 'default', name: 'Celadon'}, ...named_themes]) {
+        await test(`${name} supplies four ordered plot colors per mode and notifies renderers`, () => {
+            const node = theme_root(), theme = createTheme({root: node, theme: id});
+            const updates = [], stop = onThemeChange(node, colors => updates.push(series_colors(colors)));
+            const modes = {};
+            try {
+                for (const mode of ['light', 'dark']) {
+                    theme.setMode(mode, {persist: false});
+                    const colors = palette(node), style = getComputedStyle(node);
+                    const series = series_colors(colors); modes[mode] = series;
+                    equal(new Set(series).size, 4, 'Each cycle contains four distinct colors');
+                    equal(JSON.stringify(updates.at(-1)), JSON.stringify(series), 'Renderers receive the current four colors');
+                    for (const [index, color] of series.entries()) {
+                        assert(/^#[\da-f]{6}$/i.test(color));
+                        equal(color, style.getPropertyValue(`--ui-plot-${index + 1}`).trim());
+                        const distance = Math.abs(hue(color) - base_hues[index]);
+                        assert(Math.min(distance, 360 - distance) < 10, 'Keep blue, amber, green, orange-red hue order');
+                        for (const background of [colors.background, colors.surface])
+                            assert(contrast(color, background) >= 3, `${name} ${mode} plot ${index + 1} needs contrast on ${background}`);
+                    }
+                }
+                equal(new Set([...modes.light, ...modes.dark]).size, 8, 'Light and dark have separate variants');
+                for (let index = 0; index < 4; ++index)
+                    assert(luminance(modes.dark[index]) > luminance(modes.light[index]), 'Dark-mode lines use brighter colors');
+                plot_palettes.push(modes);
+                node.style.setProperty('--ui-plot-2', '#123456'); refreshTheme(node);
+                equal(updates.at(-1)[1], '#123456', 'Consumer overrides use the same notification path');
+                stop(); const count = updates.length;
+                theme.setMode('light', {persist: false}); equal(updates.length, count, 'Disposal stops plot updates');
+            } finally { stop(); theme.destroy(); node.remove(); }
+        });
+    }
+    await test('Each theme gives the four base plot colors its own tint', () => {
+        equal(plot_palettes.length, 4);
+        for (const mode of ['light', 'dark'])
+            for (let index = 0; index < 4; ++index)
+                equal(new Set(plot_palettes.map(colors => colors[mode][index])).size, 4);
+    });
     for (const [index, {id, name, accent}] of named_themes.entries()) {
         await test(`${name} provides readable palettes and stays independent of nested themes`, () => {
             const outer = theme_root(), inner = theme_root(outer), nested = theme_root(inner);
@@ -60,7 +108,7 @@ export async function test_themes({test, assert, equal, root}) {
             const third = createTheme({root: nested, theme: other});
             try {
                 const default_light = palette(inner), named_light = palette(outer), other_light = palette(nested);
-                equal(first.name, id); equal(named_light.accent, accent); equal(named_light.plot1, accent);
+                equal(first.name, id); equal(named_light.accent, accent);
                 for (const mode of ['light', 'dark']) {
                     first.setMode(mode);
                     const colors = palette(outer), style = getComputedStyle(outer);

@@ -325,8 +325,9 @@ Override a small set of semantic tokens instead of patching component internals:
 ```
 
 The main tokens are `--ui-background`, `--ui-surface`, `--ui-text`, `--ui-muted`,
-`--ui-accent`, `--ui-warning`, `--ui-danger`, `--ui-line`, `--ui-grid`, the five
-`--ui-plot-N` colors, and `--ui-font`, `--ui-serif`, and `--ui-mono`.
+`--ui-accent`, `--ui-warning`, `--ui-danger`, `--ui-line`, `--ui-grid`, the four
+series colors `--ui-plot-1` through `--ui-plot-4`, and `--ui-font`, `--ui-serif`,
+and `--ui-mono`. `--ui-plot-5` remains available for existing consumers.
 The root supplies typography and foreground color; the application chooses where
 to paint its page background. See [ui.css](styles/ui.css) for spacing, control,
 border, and supporting surface tokens.
@@ -460,6 +461,7 @@ Canvas and GPU renderers can read the same palette:
 import {palette, onThemeChange, refreshTheme} from './webui/src/index.js';
 
 const colors = palette(canvas); // Canvas is inside a styled .wui root.
+const series = [colors.plot1, colors.plot2, colors.plot3, colors.plot4];
 const unsubscribe = onThemeChange(root, next => repaint(next));
 // After the application changes tokens or stylesheets:
 refreshTheme(root);
@@ -472,6 +474,24 @@ unsubscribe();
 Palette colors must be six-digit sRGB hex strings, to support existing scientific
 renderers. CSS tokens remain the source of truth. Read them after the stylesheet
 loads and the element inherits from a root.
+
+Use `plot1` through `plot4` for a four-color line or point cycle. Every theme
+provides four light-mode colors and four brighter dark-mode variants, in this
+order:
+
+| Series | Hue | Base color | CSS token |
+| --- | --- | --- | --- |
+| `plot1` | Blue | `#3d99cc` | `--ui-plot-1` |
+| `plot2` | Amber | `#f29f24` | `--ui-plot-2` |
+| `plot3` | Green | `#74b235` | `--ui-plot-3` |
+| `plot4` | Orange-red | `#eb6235` | `--ui-plot-4` |
+
+Each palette adds a subtle tint from its theme accent and adjusts brightness for
+the background. The built-in colors have at least 3:1 contrast against both
+`background` and `surface`; use marker shapes or line styles as well as color to
+distinguish series. Theme and mode changes keep the series order. Use the four
+colors from each `onThemeChange` callback when redrawing a plot. `plot5` retains
+its previous value for compatibility and is outside this four-color cycle.
 
 `onThemeChange` calls its callback immediately and returns a disposer.
 `refreshTheme` notifies subscribers on that root after application token changes.
