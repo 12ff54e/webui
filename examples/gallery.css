@@ -56,6 +56,22 @@
 .gallery-component-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 .wui .gallery-math-demo { grid-column: 1 / -1; min-width: 0; }
 .wui .gallery-math-source .wui-input { font-family: var(--ui-mono); font-size: var(--ui-text-code); }
+.wui .gallery-plot-demo { grid-column: 1 / -1; min-width: 0; scroll-margin-top: 24px; }
+.wui .gallery-plot-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); align-items: center; gap: 32px; }
+.wui .gallery-plot { display: block; width: 100%; background: var(--ui-background); border: 1px solid var(--ui-grid); border-radius: var(--ui-radius-small); }
+.wui .gallery-plot-grid { stroke: var(--ui-grid); fill: none; }
+.wui :is(.gallery-plot-series, .gallery-plot-key)[data-series='1'] { --gallery-series-color: var(--ui-plot-1); }
+.wui :is(.gallery-plot-series, .gallery-plot-key)[data-series='2'] { --gallery-series-color: var(--ui-plot-2); }
+.wui :is(.gallery-plot-series, .gallery-plot-key)[data-series='3'] { --gallery-series-color: var(--ui-plot-3); }
+.wui :is(.gallery-plot-series, .gallery-plot-key)[data-series='4'] { --gallery-series-color: var(--ui-plot-4); }
+.wui .gallery-plot-series { color: var(--gallery-series-color); }
+.wui .gallery-plot-legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; margin: 0; }
+.wui .gallery-plot-key dt { display: flex; align-items: center; gap: 9px; font-size: 14px; }
+.wui .gallery-plot-key dd { margin: 6px 0 0 19px; color: var(--ui-muted); font: 11px var(--ui-mono); }
+.wui .gallery-plot-chip { flex: 0 0 auto; width: 10px; height: 10px; background: var(--gallery-series-color); }
+.wui .gallery-plot-key[data-series='1'] .gallery-plot-chip { border-radius: 50%; }
+.wui .gallery-plot-key[data-series='3'] .gallery-plot-chip { transform: rotate(45deg); }
+.wui .gallery-plot-key[data-series='4'] .gallery-plot-chip { clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 .gallery-component-caption { margin: 0; color: var(--ui-muted); font-size: 13px; line-height: 1.6; }
 .gallery-principles { display: grid; grid-template-columns: 1fr 1.15fr; gap: 80px; padding-block: 58px 68px; }
 .gallery-principles h2 { font-size: 43px; }.gallery-principles-lead { max-width: 290px; margin: 22px 0 0; color: var(--ui-muted); font-size: 16px; line-height: 1.7; }
@@ -78,6 +94,7 @@
     .gallery-principles { gap: 42px; }
 }
 @media (max-width: 650px) {
+    .wui .gallery-plot-layout { grid-template-columns: 1fr; gap: 24px; }
     .gallery-width { width: calc(100% - 36px); }
     .gallery-intro { grid-template-columns: 1fr; gap: 40px; padding-block: 48px; }
     .gallery h1 { font-size: 58px; letter-spacing: -1.8px; }.gallery-lead { font-size: 18px; }

@@ -1,4 +1,4 @@
-import {button, textField, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle, themePicker,
+import {button, textField, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle, themePicker, onThemeChange,
     segmentedControl, rangeField, disclosure, dialog, menu, toolbar, notice, badge, spinner} from '../src/index.js';
 import {math} from '../src/math.js';
 
@@ -232,5 +232,52 @@ panel({title: 'Mathematical expressions', description: 'Inline symbols and displ
     ], onChange: value => { expression.set({tex: equations[value]}); expression_source.set({value: equations[value]}); }}),
     expression, expression_source]}),
 ]}).mount(document.getElementById('math-host'));
+
+function plot_svg(tag, attributes = {}) {
+    const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value);
+    return node;
+}
+const plot = plot_svg('svg', {class: 'gallery-plot', viewBox: '0 0 512 160', role: 'img',
+    'aria-labelledby': 'gallery-plot-title gallery-plot-description'});
+const plot_title = plot_svg('title', {id: 'gallery-plot-title'});
+plot_title.textContent = 'Four plot series';
+const plot_description = plot_svg('desc', {id: 'gallery-plot-description'});
+plot_description.textContent = 'Illustrative data: blue circles, amber squares, green diamonds, and orange-red triangles.';
+plot.append(plot_title, plot_description);
+for (const y of [32, 64, 96, 128])
+    plot.append(plot_svg('path', {class: 'gallery-plot-grid', d: `M16 ${y}H496`, 'vector-effect': 'non-scaling-stroke'}));
+const plot_legend = element('dl', 'gallery-plot-legend'), plot_codes = [];
+const plot_series = [
+    {name: 'Blue', baseline: 52, amplitude: 20, phase: 0},
+    {name: 'Amber', baseline: 82, amplitude: 21, phase: 1.4},
+    {name: 'Green', baseline: 110, amplitude: 20, phase: 2.6},
+    {name: 'Orange-red', baseline: 82, amplitude: 27, phase: 4.1},
+];
+for (const [index, series] of plot_series.entries()) {
+    const points = Array.from({length: 25}, (_, i) => [16 + i * 20,
+        series.baseline + series.amplitude * Math.sin(i / 24 * 2 * Math.PI + series.phase)]);
+    const group = plot_svg('g', {class: 'gallery-plot-series', 'data-series': index + 1});
+    group.append(plot_svg('path', {d: points.map(([x, y], i) => `${i ? 'L' : 'M'}${x} ${y.toFixed(2)}`).join(' '),
+        fill: 'none', stroke: 'currentColor', 'stroke-width': 2, 'vector-effect': 'non-scaling-stroke'}));
+    for (const i of [2, 7, 12, 17, 22]) {
+        const [x, y] = points[i];
+        const marker = index === 0 ? plot_svg('circle', {cx: x, cy: y, r: 4})
+            : index === 1 ? plot_svg('rect', {x: x - 4, y: y - 4, width: 8, height: 8})
+            : plot_svg('path', {d: index === 2 ? `M${x} ${y - 5}l5 5-5 5-5-5Z` : `M${x} ${y - 5}l5 9h-10Z`});
+        marker.setAttribute('fill', 'currentColor'); group.append(marker);
+    }
+    plot.append(group);
+    const key = element('div', 'gallery-plot-key'); key.dataset.series = index + 1;
+    const label = element('dt'), chip = element('i', 'gallery-plot-chip'); chip.setAttribute('aria-hidden', 'true');
+    label.append(chip, series.name);
+    const code = element('dd'); key.append(label, code); plot_legend.append(key); plot_codes.push(code);
+}
+const plot_layout = element('div', 'gallery-plot-layout'); plot_layout.append(plot, plot_legend);
+panel({title: 'Plot colors', description: 'Four colors for lines and points, tuned to the selected theme.', children: [plot_layout]})
+    .mount(document.getElementById('plot-colors-host'));
+onThemeChange(theme.root, colors => {
+    for (const [index, code] of plot_codes.entries()) code.textContent = colors[`plot${index + 1}`].toUpperCase();
+});
 
 document.body.dataset.gallery = 'ready';
