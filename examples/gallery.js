@@ -1,9 +1,11 @@
-import {button, textField, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle, themePicker, onThemeChange,
+import {button, textField, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle, themePicker, cornerToggle, onThemeChange,
     segmentedControl, rangeField, disclosure, dialog, menu, toolbar, notice, badge, spinner} from '../src/index.js';
 import {math} from '../src/math.js';
 
-const theme = createTheme({theme: document.documentElement.dataset.theme, storageKey: 'webui.gallery.theme.v1'});
+const theme = createTheme({theme: document.documentElement.dataset.theme, storageKey: 'webui.gallery.theme.v1',
+    cornersStorageKey: 'webui.gallery.corners.v1'});
 themeToggle({theme, id: 'gallery-theme-toggle'}).mount(document.getElementById('gallery-theme-host'));
+cornerToggle({theme, id: 'gallery-corners-toggle'}).mount(document.getElementById('gallery-corners-host'));
 themePicker({theme, id: 'gallery-theme-picker',
     onChange: value => {
         const url = new URL(location.href);

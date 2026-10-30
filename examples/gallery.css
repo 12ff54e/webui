@@ -4,7 +4,7 @@
 .gallery-skip { position: fixed; top: -100px; left: 20px; z-index: 10; padding: 12px 18px; background: var(--ui-accent); color: var(--ui-on-accent) !important; }
 .gallery-skip:focus { top: 16px; }
 .gallery-header { display: flex; align-items: center; justify-content: space-between; gap: 32px; min-height: 104px; border-bottom: 1px solid var(--ui-line); }
-.wui :is(.gallery-brand, .gallery-footer-name) { display: inline-flex; flex: 0 0 auto; padding: 5px 8px; margin-inline-start: -8px; border-radius: 4px; }
+.wui :is(.gallery-brand, .gallery-footer-name) { display: inline-flex; flex: 0 0 auto; padding: 5px 8px; margin-inline-start: -8px; border-radius: var(--ui-radius-small); }
 .wui .gallery-wordmark {
     display: block;
     /* Fixed dark shades of Celadon green and Sorghum red. */
@@ -18,7 +18,7 @@
 }
 .gallery-header nav { display: flex; gap: 32px; font-size: 15px; color: var(--ui-muted); }
 .gallery-header nav a:hover { color: var(--ui-accent); }
-.gallery-header-actions { display: flex; align-items: center; gap: 20px; }
+.gallery-header-actions { display: flex; align-items: center; gap: 12px; }
 .gallery-version { color: var(--ui-muted); font: 10px/1.5 var(--ui-mono); text-transform: uppercase; letter-spacing: .07em; }
 .gallery-version > span { margin-inline: 5px; color: var(--ui-line); }
 .gallery-intro { display: grid; grid-template-columns: 1.4fr .65fr; align-items: center; gap: 90px; padding-block: 82px 88px; }
@@ -49,7 +49,7 @@
 .gallery-example-note .gallery-eyebrow { margin-bottom: 16px; }
 .gallery-example-note h3 { margin: 0 0 13px; font: 400 25px/1.25 var(--ui-serif); letter-spacing: -.35px; }
 .gallery-example-note > p { margin: 0 0 24px; color: var(--ui-muted); font-size: 15px; line-height: 1.7; }
-.gallery-code { overflow-x: auto; margin: 0; padding: 20px; border: 1px solid var(--ui-line); border-radius: 7px; background: var(--ui-soft); color: var(--ui-text); font: 11px/1.9 var(--ui-mono); }
+.wui .gallery-code { overflow-x: auto; margin: 0; padding: 20px; border: 1px solid var(--ui-line); border-radius: var(--ui-radius); background: var(--ui-soft); color: var(--ui-text); font: 11px/1.9 var(--ui-mono); }
 .gallery-code .gallery-code-accent { color: var(--ui-accent); }
 .gallery-readout { display: grid; grid-template-columns: auto 1fr; gap: 8px 18px; margin: 22px 0 0; font-size: 13px; }
 .gallery-readout dt { color: var(--ui-muted); }.gallery-readout dd { margin: 0; overflow-wrap: anywhere; font-family: var(--ui-mono); font-size: 11px; }

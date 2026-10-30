@@ -1,6 +1,7 @@
 import {button, panel, row, stack, status, tabs, numberField, palette, onThemeChange, refreshTheme} from '../src/index.js';
 import {test_fields} from './fields-browser.js';
 import {test_themes} from './themes-browser.js';
+import {test_corners} from './corners-browser.js';
 import {test_controls} from './controls-browser.js';
 import {test_math} from './math-browser.js';
 
@@ -130,6 +131,7 @@ export async function run() {
     });
     await test_fields({test, assert, equal, root});
     await test_themes({test, assert, equal, root});
+    await test_corners({test, assert, equal, root});
     await test_controls({test, assert, equal, root});
     await test_math({test, assert, equal, root});
     return {pass: results.every(result => result.pass), results};

@@ -8,8 +8,8 @@ renderers.
 The library uses native browser elements, ES modules, and a separate stylesheet.
 The core has no runtime dependencies or required build step. It supplies shared
 controls, typography and spacing, and themes with light and dark modes.
-Applications can save mode preferences when needed. Optional math rendering uses
-a bundled copy of KaTeX, including its stylesheet and fonts.
+Applications can save mode and corner preferences when needed. Optional math
+rendering uses a bundled copy of KaTeX, including its stylesheet and fonts.
 
 ## Start
 
@@ -79,6 +79,7 @@ changes to those properties.
 | --- | --- |
 | `button` | `label`, `variant`, `disabled`, `onClick(event)` |
 | `themeToggle` | `label`, `disabled`; pass a theme controller as `theme` at construction |
+| `cornerToggle` | `label`, `disabled`; pass a theme controller as `theme` at construction |
 | `themePicker` | `label`, `disabled`, `onChange(name, event)`; pass a theme controller as `theme` at construction |
 | `status` | `text`, `tone` |
 | `panel` | `title`, `description` |
@@ -369,11 +370,13 @@ the IDs in the table in code and attributes. The controller owns these
 attributes and notifies renderers when either selection changes:
 
 ```js
-import {createTheme, themeToggle, themePicker} from './webui/src/index.js';
+import {createTheme, themeToggle, themePicker, cornerToggle} from './webui/src/index.js';
 
 const theme = createTheme({root: document.documentElement,
-  theme: 'cloisonne', storageKey: 'my-app.mode.v1', defaultMode: 'light'});
+  theme: 'cloisonne', storageKey: 'my-app.mode.v1', defaultMode: 'light',
+  cornersStorageKey: 'my-app.corners.v1', defaultCorners: 'rounded'});
 const toggle = themeToggle({theme}).mount(document.getElementById('toolbar'));
+const corners = cornerToggle({theme}).mount(document.getElementById('toolbar'));
 const picker = themePicker({theme}).mount(document.getElementById('toolbar'));
 theme.setMode('dark');
 theme.setTheme('default'); // Selects Celadon and keeps dark mode.
@@ -382,6 +385,7 @@ theme.toggleMode();
 console.log(theme.name, theme.mode); // 'default', 'dark'
 // At teardown:
 toggle.destroy();
+corners.destroy();
 picker.destroy();
 theme.destroy();
 ```
@@ -393,11 +397,12 @@ Selecting the current theme emits none. It does not save the theme name or write
 the mode preference. Applications choose how to retain theme identity, such as a
 URL parameter or their own settings. The gallery's theme picker uses its URL.
 
-`themePicker` supplies a circular palette button and a dropdown of color circles
-for all built-in themes. Each circle uses that theme's accent in the current
-light or dark mode. A checkmark marks the selected theme. Custom labels appear
-beside circles on hover or keyboard focus; touch screens show the names while
-the menu is open. Labels choose the side with room and wrap on narrow screens.
+`themePicker` supplies a palette button and a dropdown of theme swatches. The
+button and swatches are circular in the rounded design. Each swatch uses that
+theme's accent in the current light or dark mode. A checkmark marks the selected
+theme. Custom labels appear beside swatches on hover or keyboard focus; touch
+screens show the names while the menu is open. Labels choose the side with room
+and wrap on narrow screens.
 
 Pass `onChange(name, event)` to save a user's selection in your URL or settings.
 Selecting the current theme, or changing the controller programmatically, does
@@ -414,7 +419,7 @@ destroying the controller. The controller exposes its read-only `root`; the
 picker uses that root's document unless the same document is passed explicitly.
 Recreate both if the root moves to another document.
 
-`themeToggle` supplies a circular native button, a split light/dark icon, and the
+`themeToggle` supplies a native button, a split light/dark icon, and the
 stable accessible label "Dark mode". It manages `aria-pressed` and follows the
 controller when the mode changes. Its optional `label` replaces the accessible
 label and tooltip. It supports the usual component methods, including silent
@@ -423,19 +428,47 @@ For custom markup, `theme.bindToggle(button)` returns a binding disposer.
 Destroying the controller removes all bindings and its storage listener while
 leaving the DOM and mode in place. Later controller updates throw.
 
-Both shared buttons rotate their icons by 35 degrees on hover or keyboard focus,
-with a small press response. Reduced-motion settings disable these transforms.
+`cornerToggle` supplies a native button with the label "Sharp corners" and an
+icon showing a square and a curved corner. `aria-pressed="true"` selects sharp
+corners. Place it beside `themeToggle`; both keep their nodes and focus while
+the appearance changes. It accepts `label`, `disabled`, and `hidden` updates.
+It uses the controller's document and releases its binding on destruction.
 
-Persistence is opt-in: omit `storageKey` to avoid storage access. With a key,
-initial mode uses a valid saved value, then `defaultMode`; existing root
-attributes do not override that choice. Invalid saved values and storage clears
-use the default. `setMode` accepts only `light` or `dark`. It saves by default,
+The controller's `corners` property is `rounded` by default. Use
+`setCorners('sharp')`, `setCorners('rounded')`, or `toggleCorners()` to change it.
+These methods return the controller, preserve theme and mode, and send one
+`webui-theme-change` notification per change. Use `bindCornerToggle(button)` to
+bind custom markup; it returns a disposer.
+
+Set `data-corners="sharp"` on a `.wui` root to select the same design without a
+controller. Each nested root owns its corner choice. Sharp mode sets the radius
+tokens to zero for panels, controls, menus, swatches, sliders, and indicators.
+Consumer CSS can use `--ui-radius-small`, `--ui-radius`, and `--ui-radius-large`
+to follow the choice. Plot marker shapes, icons, and glyphs keep their geometry.
+
+The three appearance buttons rotate their icons by 35 degrees on hover or
+keyboard focus, with a small press response. Reduced-motion settings disable
+these transforms.
+
+Persistence is opt-in: omit both `storageKey` and `cornersStorageKey` to avoid
+storage access. With a mode key, initial mode uses a valid saved value, then
+`defaultMode`; existing root attributes do not override that choice. Invalid
+saved values and storage clears use the default. `setMode` accepts only `light`
+or `dark`. It saves by default,
 even when the mode already matches, and emits one
 notification per change. Storage notifications from the same key and storage
 area update the theme without writing back. Denied storage access leaves theme
 changes available. The controller uses the root's document at construction;
 destroy and recreate it if the root moves to another document. System theme
 selection is not automatic.
+
+Corner persistence is also opt-in. Set `cornersStorageKey` to a separate key;
+using the mode key for corners throws. The controller restores a valid saved
+`rounded` or `sharp` value, otherwise `defaultCorners` (which defaults to
+`rounded`). `setCorners` saves by default; pass `{persist: false}` for a temporary
+change. Storage notifications update only their matching preference without
+writing back. Clears restore the defaults, and denied storage leaves both
+switches usable. Destroying the controller releases both kinds of bindings.
 
 To restore a document theme before the first paint, put the optional classic
 helper before stylesheets and use the same key and default in the controller:
@@ -444,7 +477,8 @@ helper before stylesheets and use the same key and default in the controller:
 <html class="wui" data-theme="cloisonne">
 <head>
   <script src="./webui/src/theme_boot.js"
-    data-storage-key="my-app.mode.v1" data-default-mode="light"></script>
+    data-storage-key="my-app.mode.v1" data-default-mode="light"
+    data-corners-storage-key="my-app.corners.v1" data-default-corners="rounded"></script>
   <link rel="stylesheet" href="./webui/styles/ui.css">
 </head>
 ```
@@ -454,7 +488,8 @@ The helper uses its script's `data-theme` when present, then the root's
 valid saved preference or `data-default-mode`, falling back to light when no
 default is given. Create the controller with the same theme name, key, and
 default mode to keep that first palette. The helper creates no controller or
-global API.
+global API. `data-corners-storage-key` and `data-default-corners` restore corners
+in the same way; use the same values in the controller to keep the first paint.
 
 Canvas and GPU renderers can read the same palette:
 
@@ -489,10 +524,11 @@ chromatic themes use this order:
 
 Each chromatic palette adds a subtle tint from its theme accent and adjusts
 brightness for the background. Carbon uses four gray levels, from strongest to
-softest contrast, instead of those hues. The built-in colors have at least 3:1 contrast against both
-`background` and `surface`; use marker shapes or line styles as well as color to
-distinguish series. Theme and mode changes keep the series order. Use the four
-colors from each `onThemeChange` callback when redrawing a plot. `plot5` retains
+softest contrast, instead of those hues. The built-in colors have at least 3:1
+contrast against both `background` and `surface`; use marker shapes or line
+styles as well as color to distinguish series. Theme and mode changes keep the
+series order. Use the four colors from each `onThemeChange` callback when
+redrawing a plot. `plot5` retains
 its previous value for compatibility and is outside this four-color cycle.
 
 `onThemeChange` calls its callback immediately and returns a disposer.
