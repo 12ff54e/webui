@@ -56,6 +56,22 @@ Open [the gallery](examples/index.html) from the same static server. Its equilib
 and trajectory forms demonstrate composition; they do not run computations or
 establish integration with cuMES, GEPT, FACS, or meow.
 
+## GitHub Pages
+
+The [published gallery](https://12ff54e.github.io/webui/) opens the examples from
+the site root and keeps theme query parameters and section anchors.
+
+[Publish example gallery](.github/workflows/pages.yml) runs on pushes to `main`
+and can also run from the Actions tab with `main` selected. It runs the Node
+tests, stages the static site with `node scripts/build.mjs`, and deploys `build/`.
+The staged site includes the library, gallery, and bundled KaTeX assets. The
+browser suite uses the forwarded Chrome during local development.
+
+For a new repository or fork, select **Settings → Pages → Build and deployment
+→ Source → GitHub Actions** before the first run. Deployment uses the workflow's
+built-in token; no personal token or additional secret is needed. See GitHub's
+[custom workflow guide](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+
 ## Components
 
 All component factories accept an optional `document` for creating elements in
