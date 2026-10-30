@@ -247,7 +247,7 @@ plot_description.textContent = 'Illustrative data: blue circles, amber squares, 
 plot.append(plot_title, plot_description);
 for (const y of [32, 64, 96, 128])
     plot.append(plot_svg('path', {class: 'gallery-plot-grid', d: `M16 ${y}H496`, 'vector-effect': 'non-scaling-stroke'}));
-const plot_legend = element('dl', 'gallery-plot-legend'), plot_codes = [];
+const plot_legend = element('dl', 'gallery-plot-legend'), plot_codes = [], plot_labels = [];
 const plot_series = [
     {name: 'Blue', baseline: 52, amplitude: 20, phase: 0},
     {name: 'Amber', baseline: 82, amplitude: 21, phase: 1.4},
@@ -270,14 +270,21 @@ for (const [index, series] of plot_series.entries()) {
     plot.append(group);
     const key = element('div', 'gallery-plot-key'); key.dataset.series = index + 1;
     const label = element('dt'), chip = element('i', 'gallery-plot-chip'); chip.setAttribute('aria-hidden', 'true');
-    label.append(chip, series.name);
+    const name = document.createTextNode(series.name);
+    label.append(chip, name); plot_labels.push(name);
     const code = element('dd'); key.append(label, code); plot_legend.append(key); plot_codes.push(code);
 }
 const plot_layout = element('div', 'gallery-plot-layout'); plot_layout.append(plot, plot_legend);
 panel({title: 'Plot colors', description: 'Four colors for lines and points, tuned to the selected theme.', children: [plot_layout]})
     .mount(document.getElementById('plot-colors-host'));
 onThemeChange(theme.root, colors => {
-    for (const [index, code] of plot_codes.entries()) code.textContent = colors[`plot${index + 1}`].toUpperCase();
+    const gray = theme.name === 'carbon';
+    plot_description.textContent = `Illustrative data: ${gray ? 'gray' : 'blue'} circles, ${gray ? 'gray' : 'amber'} squares, ` +
+        `${gray ? 'gray' : 'green'} diamonds, and ${gray ? 'gray' : 'orange-red'} triangles.`;
+    for (const [index, code] of plot_codes.entries()) {
+        code.textContent = colors[`plot${index + 1}`].toUpperCase();
+        plot_labels[index].data = gray ? `Series ${index + 1}` : plot_series[index].name;
+    }
 });
 
 document.body.dataset.gallery = 'ready';

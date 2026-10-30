@@ -358,6 +358,7 @@ Theme identity and mode are separate. All bundled themes provide `light` and
 | `cloisonne` | Cloisonné | Porcelain, blue based on `#2775b6`, and brass |
 | `sorghum` | Sorghum | Warm ivory, grain gold, and red based on `#c02c38` |
 | `gromwell` | Gromwell | Pale lilac, muted gold, and purple based on `#5d3a6f` |
+| `carbon` | Carbon | Neutral grays, including status and plot colors |
 
 Celadon is the original theme. Its code ID remains `default`, including the
 controller's `name` property, so existing applications stay compatible.
@@ -385,7 +386,7 @@ picker.destroy();
 theme.destroy();
 ```
 
-`setTheme(name)` accepts `default`, `cloisonne`, `sorghum`, or `gromwell` and
+`setTheme(name)` accepts `default`, `cloisonne`, `sorghum`, `gromwell`, or `carbon` and
 returns the controller.
 It preserves the current mode and emits one notification when the theme changes.
 Selecting the current theme emits none. It does not save the theme name or write
@@ -476,8 +477,8 @@ renderers. CSS tokens remain the source of truth. Read them after the stylesheet
 loads and the element inherits from a root.
 
 Use `plot1` through `plot4` for a four-color line or point cycle. Every theme
-provides four light-mode colors and four brighter dark-mode variants, in this
-order:
+provides four light-mode colors and four brighter dark-mode variants. The four
+chromatic themes use this order:
 
 | Series | Hue | Base color | CSS token |
 | --- | --- | --- | --- |
@@ -486,8 +487,9 @@ order:
 | `plot3` | Green | `#74b235` | `--ui-plot-3` |
 | `plot4` | Orange-red | `#eb6235` | `--ui-plot-4` |
 
-Each palette adds a subtle tint from its theme accent and adjusts brightness for
-the background. The built-in colors have at least 3:1 contrast against both
+Each chromatic palette adds a subtle tint from its theme accent and adjusts
+brightness for the background. Carbon uses four gray levels, from strongest to
+softest contrast, instead of those hues. The built-in colors have at least 3:1 contrast against both
 `background` and `surface`; use marker shapes or line styles as well as color to
 distinguish series. Theme and mode changes keep the series order. Use the four
 colors from each `onThemeChange` callback when redrawing a plot. `plot5` retains

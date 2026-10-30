@@ -113,7 +113,7 @@ export async function test_math({test, assert, equal, root}) {
             equal(getComputedStyle(expression.element.querySelector('.fbox')).boxSizing, 'border-box');
             await document.fonts.ready;
             assert([...document.fonts].some(font => font.family.startsWith('KaTeX_') && font.status === 'loaded'));
-            for (const name of ['default', 'cloisonne', 'sorghum', 'gromwell']) {
+            for (const name of ['default', 'cloisonne', 'sorghum', 'gromwell', 'carbon']) {
                 theme.setTheme(name);
                 for (const mode of ['light', 'dark']) {
                     theme.setMode(mode, {persist: false});

@@ -40,6 +40,7 @@ export async function test_themes({test, assert, equal, root}) {
         {id: 'cloisonne', name: 'Cloisonné', accent: '#2775b6'},
         {id: 'sorghum', name: 'Sorghum', accent: '#c02c38'},
         {id: 'gromwell', name: 'Gromwell', accent: '#5d3a6f'},
+        {id: 'carbon', name: 'Carbon', accent: '#404040'},
     ];
     const luminance = hex => {
         const channels = hex.slice(1).match(/../g).map(value => {
@@ -77,8 +78,11 @@ export async function test_themes({test, assert, equal, root}) {
                     for (const [index, color] of series.entries()) {
                         assert(/^#[\da-f]{6}$/i.test(color));
                         equal(color, style.getPropertyValue(`--ui-plot-${index + 1}`).trim());
-                        const distance = Math.abs(hue(color) - base_hues[index]);
-                        assert(Math.min(distance, 360 - distance) < 10, 'Keep blue, amber, green, orange-red hue order');
+                        if (id === 'carbon') assert(/^#([\da-f]{2})\1\1$/i.test(color), 'Carbon plots use only gray');
+                        else {
+                            const distance = Math.abs(hue(color) - base_hues[index]);
+                            assert(Math.min(distance, 360 - distance) < 10, 'Keep blue, amber, green, orange-red hue order');
+                        }
                         for (const background of [colors.background, colors.surface])
                             assert(contrast(color, background) >= 3, `${name} ${mode} plot ${index + 1} needs contrast on ${background}`);
                     }
@@ -86,7 +90,7 @@ export async function test_themes({test, assert, equal, root}) {
                 equal(new Set([...modes.light, ...modes.dark]).size, 8, 'Light and dark have separate variants');
                 for (let index = 0; index < 4; ++index)
                     assert(luminance(modes.dark[index]) > luminance(modes.light[index]), 'Dark-mode lines use brighter colors');
-                plot_palettes.push(modes);
+                if (id !== 'carbon') plot_palettes.push(modes);
                 node.style.setProperty('--ui-plot-2', '#123456'); refreshTheme(node);
                 equal(updates.at(-1)[1], '#123456', 'Consumer overrides use the same notification path');
                 stop(); const count = updates.length;
@@ -99,6 +103,24 @@ export async function test_themes({test, assert, equal, root}) {
         for (const mode of ['light', 'dark'])
             for (let index = 0; index < 4; ++index)
                 equal(new Set(plot_palettes.map(colors => colors[mode][index])).size, 4);
+    });
+    await test('Carbon keeps every theme color and shadow neutral in both modes', () => {
+        const node = theme_root(), theme = createTheme({root: node, theme: 'carbon'});
+        const gray = value => assert(/^#([\da-f]{2})\1\1(?:[\da-f]{2})?$/i.test(value), `${value} must be gray`);
+        try {
+            for (const mode of ['light', 'dark']) {
+                theme.setMode(mode);
+                for (const [key, value] of Object.entries(palette(node)))
+                    if (key !== 'font' && key !== 'mono') gray(value);
+                const style = getComputedStyle(node);
+                for (const token of ['soft', 'danger-soft', 'warning-soft', 'on-accent'])
+                    gray(style.getPropertyValue(`--ui-${token}`).trim());
+                for (const token of ['shadow', 'shadow-overlay']) {
+                    const colors = style.getPropertyValue(`--ui-${token}`).match(/#[\da-f]+/gi);
+                    assert(colors?.length); colors.forEach(gray);
+                }
+            }
+        } finally { theme.destroy(); node.remove(); }
     });
     for (const [index, {id, name, accent}] of named_themes.entries()) {
         await test(`${name} provides readable palettes and stays independent of nested themes`, () => {
@@ -330,7 +352,8 @@ export async function test_themes({test, assert, equal, root}) {
             picker.trigger.focus(); key(picker.trigger, 'ArrowDown');
             assert(picker.isOpen); equal(picker.trigger.getAttribute('aria-expanded'), 'true');
             equal(document.activeElement, picker.buttons.find(button => button.value === 'sorghum'));
-            for (const [name, index] of [['End', 3], ['Home', 0], ['ArrowUp', 3], ['ArrowDown', 0]]) {
+            const last = picker.buttons.length - 1;
+            for (const [name, index] of [['End', last], ['Home', 0], ['ArrowUp', last], ['ArrowDown', 0]]) {
                 key(document.activeElement, name); equal(document.activeElement, picker.buttons[index]);
             }
             key(document.activeElement, 'Escape');
