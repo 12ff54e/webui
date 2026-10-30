@@ -1,6 +1,8 @@
 import {createTheme, themeToggle, themePicker, palette, onThemeChange, refreshTheme} from '../src/theme.js';
 
 export async function test_themes({test, assert, equal, root}) {
+    // HTTP static servers do not expose crypto.randomUUID; fixture keys need only uniqueness.
+    const unique_key = () => [...crypto.getRandomValues(new Uint32Array(4))].map(value => value.toString(16)).join('-');
     const theme_root = (parent = root) => {
         const node = document.createElement('section');
         node.className = 'wui'; parent.append(node);
@@ -172,7 +174,7 @@ export async function test_themes({test, assert, equal, root}) {
         });
 
         await test(`${name} selection preserves mode, preference, focused controls, and notification counts`, () => {
-            const key = `webui.test.selection.${crypto.randomUUID()}`;
+            const key = `webui.test.selection.${unique_key()}`;
             const node = theme_root();
             localStorage.setItem(key, 'light');
             const theme = createTheme({root: node, storageKey: key, theme: id});
@@ -276,7 +278,7 @@ export async function test_themes({test, assert, equal, root}) {
     });
 
     await test('Picker selections preserve mode and preference while synchronizing other pickers once', () => {
-        const key = `webui.test.picker.${crypto.randomUUID()}`, node = theme_root();
+        const key = `webui.test.picker.${unique_key()}`, node = theme_root();
         localStorage.setItem(key, 'light');
         const theme = createTheme({root: node, storageKey: key});
         theme.setMode('dark', {persist: false});
@@ -463,7 +465,7 @@ export async function test_themes({test, assert, equal, root}) {
     });
 
     await test('Saved preferences and storage changes obey the selected key and area', () => {
-        const key = `webui.test.theme.${crypto.randomUUID()}`;
+        const key = `webui.test.theme.${unique_key()}`;
         const node = theme_root(), other = theme_root();
         let first, second;
         try {
@@ -513,7 +515,7 @@ export async function test_themes({test, assert, equal, root}) {
     });
 
     await test('The classic boot helper restores the same theme before the stylesheet', async () => {
-        const key = `webui.test.boot.${crypto.randomUUID()}`;
+        const key = `webui.test.boot.${unique_key()}`;
         const script = new URL('../src/theme_boot.js', import.meta.url).href;
         const stylesheet = new URL('../styles/ui.css', import.meta.url).href;
         try {
@@ -540,7 +542,7 @@ export async function test_themes({test, assert, equal, root}) {
     });
 
     await test('The boot helper selects configured names before paint and rejects invalid identities', async () => {
-        const key = `webui.test.named-boot.${crypto.randomUUID()}`;
+        const key = `webui.test.named-boot.${unique_key()}`;
         const script = new URL('../src/theme_boot.js', import.meta.url).href;
         const stylesheet = new URL('../styles/ui.css', import.meta.url).href;
         const cases = [
