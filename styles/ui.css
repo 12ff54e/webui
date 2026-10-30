@@ -1,3 +1,5 @@
+@import url('./layout.css');
+
 /* webui themes. Colors consumed by renderers use six-digit sRGB hex. */
 /* Plot 1–4 keep the blue, amber, green, orange-red series order, except in Carbon.
    Plot 5 is retained for existing consumers outside that four-color cycle. */

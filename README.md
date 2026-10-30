@@ -1,9 +1,8 @@
 # webui
 
-Small JavaScript components for a shared visual language across scientific web
-applications. Create controls imperatively, retain their DOM nodes, and update
-them explicitly. Applications own their state, scientific rules, workers, and
-renderers.
+Small JavaScript components and shared styles for web applications. Create
+controls imperatively, retain their DOM nodes, and update them explicitly.
+Applications own their state, domain rules, workers, and renderers.
 
 The library uses native browser elements, ES modules, and a separate stylesheet.
 The core has no runtime dependencies or required build step. It supplies shared
@@ -366,6 +365,45 @@ These variants keep control presentation in the library while applications
 choose their page composition.
 Native `.wui-button` toggles can use `data-tone="warning"` with
 `aria-pressed="true"` for a selected warning-colored treatment.
+
+### Page and presentation patterns
+
+`styles/ui.css` includes opt-in page, form, and display styles from
+`styles/layout.css`. Use them on native HTML or on retained component elements.
+They supply visual roles without changing DOM ownership, events, or app state.
+The [Project notebook example](examples/layout.html) uses these styles without
+an app stylesheet.
+
+| Role | Classes and options |
+| --- | --- |
+| Page | `.wui-app` on the body inside an HTML `.wui` root; `.wui-page` for gutters and width; `data-width="reading"` for prose |
+| Header | `.wui-header`, `.wui-brand`, `.wui-brand-title`, `.wui-brand-description`, `.wui-header-actions`, `.wui-icon-actions` |
+| Introduction and footer | `.wui-intro`, `.wui-lead`, `.wui-aside`, `.wui-footer`, `.wui-separator`, `.wui-prose` |
+| Rows and grids | `.wui-row` with `data-justify="between\|end"`, `data-align="start"`, or `data-wrap="false"`; `.wui-grid` with optional `data-columns="two"` |
+| Native forms | `.wui-form`, `.wui-fieldset`, `.wui-form-row`; `.wui-label` with `data-layout="inline\|stacked\|check"`; `.wui-input` with `data-width="short"` |
+| Panel content | `.wui-inset` with optional `data-edge="top\|bottom"`; `.wui-panel-inset`; `.wui-panel-head` with `data-layout="row"`; `.wui-panel-title-group` |
+| Text | `.wui-code-note`, `.wui-caption-text`, `.wui-context-text`, `.wui-readout`, `.wui-text-accent`, `.wui-text-warning` |
+| Section spacing | `.wui-space-before`, `.wui-space-after`; optional `data-space="large"` |
+| Display frames | `.wui-visual`, `.wui-visual-surface`, `.wui-frame`, `.wui-overlay-label` with optional `data-tone="accent\|warning"` |
+| Legends | `.wui-legend`, `.wui-swatch`, `.wui-color-scale`, `.wui-color-scale-bar`, `.wui-color-scale-ticks` |
+
+Values separated by `\|` are alternatives. These are HTML attributes; set them
+on the element, not through a component's `set()` method unless its API lists
+that option. `data-edge` pads only that edge and the sides. Grid columns collapse
+on narrow screens; native controls retain their values and focus. Page width can
+be set with `--ui-page-width` on the page element.
+
+Use `data-series="1"` through `"4"` on legend items for shared series colors.
+Swatches are dots by default; `data-kind="line"` draws a line, with optional
+`data-line="dashed\|dotted"`. Include text labels and line patterns so color is
+not the only way to tell series apart. Applications supply continuous gradients,
+tick values, plot dimensions, and overlay positions.
+
+These patterns are general building blocks. Applications still choose their
+workspace columns, responsive topology, visibility rules, branding geometry,
+and domain content. Do not add application IDs or selectors to the library.
+
+### Themes
 
 Theme identity and mode are separate. All bundled themes provide `light` and
 `dark` modes:

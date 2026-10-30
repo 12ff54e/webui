@@ -1,9 +1,9 @@
 {
   "name": "webui",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
-  "description": "Small browser-native components for scientific web applications",
+  "description": "Small browser-native components and shared styles for web applications",
   "exports": {
     ".": "./src/index.js",
     "./style.css": "./styles/ui.css",

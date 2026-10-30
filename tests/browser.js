@@ -4,6 +4,7 @@ import {test_themes} from './themes-browser.js';
 import {test_corners} from './corners-browser.js';
 import {test_controls} from './controls-browser.js';
 import {test_math} from './math-browser.js';
+import {test_layout} from './layout-browser.js';
 
 export async function run() {
     const results = [];
@@ -134,5 +135,6 @@ export async function run() {
     await test_corners({test, assert, equal, root});
     await test_controls({test, assert, equal, root});
     await test_math({test, assert, equal, root});
+    await test_layout({test, assert, equal, root});
     return {pass: results.every(result => result.pass), results};
 }

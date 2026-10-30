@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en" class="wui">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>webui · Project notebook</title>
+  <script src="../src/theme_boot.js"></script>
+  <link rel="stylesheet" href="../styles/ui.css">
+  <link rel="stylesheet" href="../styles/fonts.css">
+</head>
+<body class="wui-app">
+  <header class="wui-page wui-header">
+    <a class="wui-brand" href="../"><span class="wui-brand-title">Notebook</span></a>
+    <div class="wui-header-actions">
+      <nav class="wui-nav" aria-label="Notebook"><a href="#projects" aria-current="page">Projects</a><a href="#settings">Settings</a></nav>
+      <div id="appearance" class="wui-icon-actions" role="group" aria-label="Appearance"></div>
+    </div>
+  </header>
+  <main class="wui-page" data-width="reading">
+    <section class="wui-intro">
+      <div><p class="wui-kicker">A shared workspace</p><h1 class="wui-page-title">Project notebook<span class="wui-text-warning">.</span></h1><p class="wui-lead">Keep the small details in one place.</p></div>
+      <aside class="wui-aside"><i class="wui-status-dot" data-tone="success" data-halo="true" aria-hidden="true"></i><div>Local draft<small>Ready to edit</small></div></aside>
+    </section>
+    <div class="wui-grid" data-columns="two">
+      <section id="projects" class="wui-panel" data-clip="true" aria-labelledby="project-title">
+        <div class="wui-panel-head" data-layout="row"><h2 id="project-title" class="wui-panel-title">Current project</h2><span class="wui-badge">Draft</span></div>
+        <div class="wui-panel-body wui-form">
+          <label class="wui-label" data-layout="stacked">Name<input class="wui-input" value="Community garden"></label>
+          <label class="wui-label" data-layout="inline">Category<select class="wui-input"><option>Personal</option><option>Shared</option></select></label>
+          <label class="wui-label" data-layout="stacked">Notes<textarea class="wui-input" rows="4">Choose plants for the spring beds.</textarea></label>
+          <label class="wui-label" data-layout="check"><input type="checkbox" checked>Show this project on the home page</label>
+          <p class="wui-helper">This example keeps native editing and focus behavior.</p>
+          <div class="wui-row" data-gap="small"><button class="wui-button" data-variant="primary" type="button">Save draft</button><button class="wui-button" type="button">Archive</button></div>
+        </div>
+      </section>
+      <section id="settings" class="wui-panel" data-clip="true" aria-labelledby="activity-title">
+        <div class="wui-panel-head"><h2 id="activity-title" class="wui-panel-title">Activity</h2></div>
+        <div class="wui-panel-body wui-form">
+          <div class="wui-readout"><output>12</output> tasks this week</div>
+          <ul class="wui-legend"><li data-series="1"><i class="wui-swatch" data-kind="line" aria-hidden="true"></i>Planned</li><li data-series="2"><i class="wui-swatch" data-kind="line" data-line="dashed" aria-hidden="true"></i>Finished</li></ul>
+          <details class="wui-disclosure" open><summary>Weekly note</summary><div class="wui-disclosure-body wui-prose"><p>Leave room for work that arrives during the week.</p></div></details>
+          <div class="wui-frame wui-inset"><span class="wui-overlay-label">Shared frame and label styles</span></div>
+          <p class="wui-caption-text">The page uses only webui styles. Its content and behavior belong to the application.</p>
+        </div>
+      </section>
+    </div>
+    <footer class="wui-footer"><span>Notebook<span class="wui-separator" aria-hidden="true">/</span>Layout example</span><a href="../">Component gallery ↗</a></footer>
+  </main>
+  <script type="module">
+    import {createTheme, themePicker, themeToggle, cornerToggle} from '../src/index.js';
+    const theme = createTheme();
+    for (const create of [themePicker, themeToggle, cornerToggle])
+      create({theme}).mount(document.getElementById('appearance'));
+  </script>
+</body>
+</html>
