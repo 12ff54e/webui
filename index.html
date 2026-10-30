@@ -1,13 +1,48 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="wui" data-theme="default">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Wui example gallery</title>
-  <script type="module" src="examples/redirect.js"></script>
-  <noscript><meta http-equiv="refresh" content="0;url=examples/"></noscript>
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="webui: a shared visual language for scientific tools. Explore small, browser-native components and interface examples.">
+  <title>webui · A common language for scientific tools</title>
+  <script src="examples/page_theme.js"></script>
+  <script src="src/theme_boot.js" data-storage-key="webui.gallery.theme.v1" data-corners-storage-key="webui.gallery.corners.v1"></script>
+  <link rel="stylesheet" href="styles/ui.css">
+  <link rel="stylesheet" href="styles/math.css">
+  <link rel="stylesheet" href="styles/fonts.css">
+  <link rel="stylesheet" href="examples/gallery.css">
 </head>
-<body>
-  <a href="examples/">Open the example gallery</a>
+<body class="gallery">
+  <a class="gallery-skip" href="#examples">Skip to examples</a>
+  <header class="gallery-header gallery-width">
+    <a class="gallery-brand" href="#" aria-label="webui home"><svg class="gallery-wordmark" viewBox="0 0 192 72" width="96" height="36" aria-hidden="true" focusable="false"><use href="examples/wordmark.svg#wordmark"/></svg></a>
+    <nav aria-label="Gallery navigation"><a href="#examples">Examples</a><a href="#components">Components</a><a href="#principles">Principles</a></nav>
+    <div class="gallery-header-actions"><span class="gallery-version">0.8.0 <span>—</span> early edition</span><span id="gallery-theme-picker-host"></span><span id="gallery-theme-host"></span><span id="gallery-corners-host"></span></div>
+  </header>
+  <main class="gallery-width">
+    <section class="gallery-intro" aria-labelledby="gallery-title">
+      <div><p class="gallery-eyebrow">A shared visual language</p><h1 id="gallery-title">Shared controls.<br>Scientific <em>tools.</em></h1><p class="gallery-lead">Small components for scientific work.<br>Consistent controls, clear states, flexible layouts.</p><a class="gallery-jump" href="#examples">Explore the components <span aria-hidden="true">↘</span></a></div>
+      <div class="gallery-identity" aria-label="Visual foundation: selected theme colors, Biolinum and Libertine">
+        <div class="gallery-type-sample" aria-hidden="true"><span>Aa</span><small>α β φ</small></div>
+        <div class="gallery-swatch-strip" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+        <div class="gallery-foundation"><span>01 / Foundation</span><p>Biolinum for controls. <br>Libertine for headings.</p></div>
+      </div>
+    </section>
+    <section class="gallery-section" id="examples" aria-labelledby="examples-title">
+      <div class="gallery-section-head"><div><p class="gallery-eyebrow">01 / In context</p><h2 id="examples-title">One library, different tools.</h2></div><p>Interface examples built from the same components.<br>These forms demonstrate the UI; they do not run a solver.</p></div>
+      <div id="examples-host"></div>
+    </section>
+    <section class="gallery-section" id="components" aria-labelledby="components-title">
+      <div class="gallery-section-head"><div><p class="gallery-eyebrow">02 / The essentials</p><h2 id="components-title">A small set of components.</h2></div><p>Native controls with shared structure,<br>spacing, and feedback.</p></div>
+      <div class="gallery-component-grid"><div id="actions-host"></div><div id="feedback-host"></div><div id="interaction-host"></div><div id="overlays-host"></div><div class="gallery-math-demo" id="math-host"></div><div class="gallery-plot-demo" id="plot-colors-host"></div></div>
+    </section>
+    <section class="gallery-principles gallery-section" id="principles" aria-labelledby="principles-title">
+      <div><p class="gallery-eyebrow">03 / Design principles</p><h2 id="principles-title">Shared design.<br>Independent apps.</h2><p class="gallery-principles-lead">Each project shares controls and styling while keeping its own application logic.</p></div>
+      <dl><div><dt><span>01</span>Direct construction</dt><dd>Create components in JavaScript. Update them through small, explicit methods.</dd></div><div><dt><span>02</span>Application-owned science</dt><dd>Keep numerical rules, workers, and plots in the application. Share the controls around them.</dd></div><div><dt><span>03</span>Shared themes</dt><dd>Switch between light and dark palettes. Controls and scientific plots use the same colors.</dd></div></dl>
+    </section>
+  </main>
+  <footer class="gallery-footer gallery-width"><span class="gallery-footer-name" role="img" aria-label="Wui."><svg class="gallery-wordmark" viewBox="0 0 192 72" width="72" height="27" aria-hidden="true" focusable="false"><use href="examples/wordmark.svg#wordmark"/></svg></span><span>Shared controls for scientific applications.</span><a href="README.md">Read the source guide <span aria-hidden="true">↗</span></a></footer>
+  <script type="module" src="examples/gallery.js"></script>
 </body>
 </html>

@@ -52,14 +52,15 @@ Serve the files over HTTP(S), with JavaScript MIME types. Opening the page throu
 JS entry point, `webui/style.css`, and optional `webui/fonts.css` for consumers
 that use one.
 
-Open [the gallery](examples/index.html) from the same static server. Its equilibrium
+Open [the gallery](index.html) from the same static server. Its equilibrium
 and trajectory forms demonstrate composition; they do not run computations or
 establish integration with cuMES, GEPT, FACS, or meow.
 
 ## GitHub Pages
 
-The [published gallery](https://12ff54e.github.io/webui/) opens the examples from
-the site root and keeps theme query parameters and section anchors.
+The [published gallery](https://12ff54e.github.io/webui/) loads directly at
+`/webui/`. Its entry point is `index.html`; scripts, gallery styles, and logos
+remain in `examples/`.
 
 [Publish example gallery](.github/workflows/pages.yml) runs on pushes to `main`
 and can also run from the Actions tab with `main` selected. It runs the Node
@@ -580,7 +581,7 @@ node scripts/test-browser.mjs http://localhost:6969/magnetic-equilibrium-solver/
 
 The optional build copies the runtime, styles, bundled KaTeX files, and gallery
 to ignored `build/`.
-Serve `build/examples/index.html` to check the staged package.
+Serve `build/index.html` to check the staged package.
 
 The browser runner uses an existing Chrome CDP connection at `localhost:9333`;
 `WEBUI_CDP_URL` overrides it. It creates one tab in the existing window and closes
