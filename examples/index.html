@@ -6,19 +6,19 @@
   <meta name="color-scheme" content="light dark">
   <meta name="description" content="webui: a shared visual language for scientific tools. Explore small, browser-native components and interface examples.">
   <title>webui · A common language for scientific tools</title>
-  <script src="examples/page_theme.js"></script>
-  <script src="src/theme_boot.js" data-storage-key="webui.gallery.theme.v1" data-corners-storage-key="webui.gallery.corners.v1"></script>
-  <link rel="stylesheet" href="styles/ui.css">
-  <link rel="stylesheet" href="styles/math.css">
-  <link rel="stylesheet" href="styles/fonts.css">
-  <link rel="stylesheet" href="examples/gallery.css">
+  <script src="page_theme.js"></script>
+  <script src="./webui/src/theme_boot.js" data-storage-key="webui.gallery.theme.v1" data-corners-storage-key="webui.gallery.corners.v1"></script>
+  <link rel="stylesheet" href="./webui/styles/ui.css">
+  <link rel="stylesheet" href="./webui/styles/math.css">
+  <link rel="stylesheet" href="./webui/styles/fonts.css">
+  <link rel="stylesheet" href="gallery.css">
 </head>
 <body class="gallery">
   <a class="gallery-skip" href="#examples">Skip to examples</a>
   <header class="gallery-header gallery-width">
-    <a class="gallery-brand" href="#" aria-label="webui home"><svg class="gallery-wordmark" viewBox="0 0 192 72" width="96" height="36" aria-hidden="true" focusable="false"><use href="examples/wordmark.svg#wordmark"/></svg></a>
-    <nav aria-label="Gallery navigation"><a href="#examples">Examples</a><a href="#components">Components</a><a href="examples/layout.html">App layout</a><a href="#principles">Principles</a></nav>
-    <div class="gallery-header-actions"><span class="gallery-version">0.9.0 <span>—</span> early edition</span><span id="gallery-theme-picker-host"></span><span id="gallery-theme-host"></span><span id="gallery-corners-host"></span></div>
+    <a class="gallery-brand" href="#" aria-label="webui home"><svg class="gallery-wordmark" viewBox="0 0 192 72" width="96" height="36" aria-hidden="true" focusable="false"><use href="wordmark.svg#wordmark"/></svg></a>
+    <nav aria-label="Gallery navigation"><a href="#examples">Examples</a><a href="#components">Components</a><a href="layout.html">App layout</a><a href="#principles">Principles</a></nav>
+    <div class="gallery-header-actions"><span class="gallery-version">0.9.1 <span>—</span> early edition</span><span id="gallery-theme-picker-host"></span><span id="gallery-theme-host"></span><span id="gallery-corners-host"></span></div>
   </header>
   <main class="gallery-width">
     <section class="gallery-intro" aria-labelledby="gallery-title">
@@ -42,7 +42,7 @@
       <dl><div><dt><span>01</span>Direct construction</dt><dd>Create components in JavaScript. Update them through small, explicit methods.</dd></div><div><dt><span>02</span>Application-owned science</dt><dd>Keep numerical rules, workers, and plots in the application. Share the controls around them.</dd></div><div><dt><span>03</span>Shared themes</dt><dd>Switch between light and dark palettes. Controls and scientific plots use the same colors.</dd></div></dl>
     </section>
   </main>
-  <footer class="gallery-footer gallery-width"><span class="gallery-footer-name" role="img" aria-label="Wui."><svg class="gallery-wordmark" viewBox="0 0 192 72" width="72" height="27" aria-hidden="true" focusable="false"><use href="examples/wordmark.svg#wordmark"/></svg></span><span>Shared controls for scientific applications.</span><a href="README.md">Read the source guide <span aria-hidden="true">↗</span></a></footer>
-  <script type="module" src="examples/gallery.js"></script>
+  <footer class="gallery-footer gallery-width"><span class="gallery-footer-name" role="img" aria-label="Wui."><svg class="gallery-wordmark" viewBox="0 0 192 72" width="72" height="27" aria-hidden="true" focusable="false"><use href="wordmark.svg#wordmark"/></svg></span><span>Shared controls for scientific applications.</span><a href="https://github.com/12ff54e/webui/blob/main/README.md">Read the source guide <span aria-hidden="true">↗</span></a></footer>
+  <script type="module" src="gallery.js"></script>
 </body>
 </html>

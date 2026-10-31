@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>webui · Project notebook</title>
-  <script src="../src/theme_boot.js"></script>
-  <link rel="stylesheet" href="../styles/ui.css">
-  <link rel="stylesheet" href="../styles/fonts.css">
+  <script src="./webui/src/theme_boot.js"></script>
+  <link rel="stylesheet" href="./webui/styles/ui.css">
+  <link rel="stylesheet" href="./webui/styles/fonts.css">
 </head>
 <body class="wui-app">
   <header class="wui-page wui-header">
-    <a class="wui-brand" href="../"><span class="wui-brand-title">Notebook</span></a>
+    <a class="wui-brand" href="./"><span class="wui-brand-title">Notebook</span></a>
     <div class="wui-header-actions">
       <nav class="wui-nav" aria-label="Notebook"><a href="#projects" aria-current="page">Projects</a><a href="#settings">Settings</a></nav>
       <div id="appearance" class="wui-icon-actions" role="group" aria-label="Appearance"></div>
@@ -44,10 +44,10 @@
         </div>
       </section>
     </div>
-    <footer class="wui-footer"><span>Notebook<span class="wui-separator" aria-hidden="true">/</span>Layout example</span><a href="../">Component gallery ↗</a></footer>
+    <footer class="wui-footer"><span>Notebook<span class="wui-separator" aria-hidden="true">/</span>Layout example</span><a href="./">Component gallery ↗</a></footer>
   </main>
   <script type="module">
-    import {createTheme, themePicker, themeToggle, cornerToggle} from '../src/index.js';
+    import {createTheme, themePicker, themeToggle, cornerToggle} from './webui/src/index.js';
     const theme = createTheme();
     for (const create of [themePicker, themeToggle, cornerToggle])
       create({theme}).mount(document.getElementById('appearance'));

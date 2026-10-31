@@ -1,6 +1,6 @@
 import {button, textField, numberField, selectField, checkbox, panel, stack, row, status, tabs, createTheme, themeToggle, themePicker, cornerToggle, onThemeChange,
-    segmentedControl, rangeField, disclosure, dialog, menu, toolbar, notice, badge, spinner} from '../src/index.js';
-import {math} from '../src/math.js';
+    segmentedControl, rangeField, disclosure, dialog, menu, toolbar, notice, badge, spinner} from './webui/src/index.js';
+import {math} from './webui/src/math.js';
 
 const theme = createTheme({theme: document.documentElement.dataset.theme, storageKey: 'webui.gallery.theme.v1',
     cornersStorageKey: 'webui.gallery.corners.v1'});

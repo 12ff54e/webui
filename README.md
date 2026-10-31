@@ -51,21 +51,26 @@ Serve the files over HTTP(S), with JavaScript MIME types. Opening the page throu
 JS entry point, `webui/style.css`, and optional `webui/fonts.css` for consumers
 that use one.
 
-Open [the gallery](index.html) from the same static server. Its equilibrium
-and trajectory forms demonstrate composition; they do not run computations or
-establish integration with cuMES, GEPT, FACS, or meow.
+Build the examples with `node scripts/build.mjs`, then serve `build/` over HTTP(S)
+and open its `index.html`. The [published gallery](https://12ff54e.github.io/webui/)
+shows the same examples. Its equilibrium and trajectory forms demonstrate
+composition; they do not run computations or establish integration with cuMES,
+GEPT, FACS, or meow.
 
 ## GitHub Pages
 
 The [published gallery](https://12ff54e.github.io/webui/) loads directly at
-`/webui/`. Its entry point is `index.html`; scripts, gallery styles, and logos
-remain in `examples/`.
+`/webui/`. The `examples/` directory contains only page sources and their own
+assets. These pages reference `./webui/` and run after the build supplies the
+library files. The build copies each example file unchanged into `build/` and
+copies `src/`, `styles/`, and `vendor/` into `build/webui/`. Publishing uploads
+`build/` without rewriting paths.
 
 [Publish example gallery](.github/workflows/pages.yml) runs on pushes to `main`
 and can also run from the Actions tab with `main` selected. It runs the Node
-tests, stages the static site with `node scripts/build.mjs`, and deploys `build/`.
-The staged site includes the library, gallery, and bundled KaTeX assets. The
-browser suite uses the forwarded Chrome during local development.
+tests, builds the example site with `node scripts/build.mjs`, and deploys `build/`.
+The built site includes the library, gallery, Notebook, and bundled KaTeX assets.
+The browser suite uses the forwarded Chrome during local development.
 
 For a new repository or fork, select **Settings → Pages → Build and deployment
 → Source → GitHub Actions** before the first run. Deployment uses the workflow's
@@ -371,8 +376,9 @@ Native `.wui-button` toggles can use `data-tone="warning"` with
 `styles/ui.css` includes opt-in page, form, and display styles from
 `styles/layout.css`. Use them on native HTML or on retained component elements.
 They supply visual roles without changing DOM ownership, events, or app state.
-The [Project notebook example](examples/layout.html) uses these styles without
-an app stylesheet.
+The [Project notebook example](https://12ff54e.github.io/webui/layout.html) uses
+these styles without an app stylesheet. After building locally, open
+`build/layout.html`.
 
 | Role | Classes and options |
 | --- | --- |
@@ -617,9 +623,10 @@ node scripts/build.mjs
 node scripts/test-browser.mjs http://localhost:6969/magnetic-equilibrium-solver/webui/tests/
 ```
 
-The optional build copies the runtime, styles, bundled KaTeX files, and gallery
-to ignored `build/`.
-Serve `build/index.html` to check the staged package.
+The example build assembles a site in ignored `build/`. Serve `build/index.html`
+to check the gallery and `build/layout.html` for the Notebook. Example HTML, JS,
+and CSS are copied unchanged; the build places library files at their expected
+paths. The library itself still works without a build step.
 
 The browser runner uses an existing Chrome CDP connection at `localhost:9333`;
 `WEBUI_CDP_URL` overrides it. It creates one tab in the existing window and closes

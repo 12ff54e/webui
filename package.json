@@ -1,6 +1,6 @@
 {
   "name": "webui",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "private": true,
   "type": "module",
   "description": "Small browser-native components and shared styles for web applications",
