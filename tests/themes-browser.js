@@ -55,6 +55,28 @@ export async function test_themes({test, assert, equal, root}) {
         const a = luminance(foreground), b = luminance(background);
         return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
     };
+    await test('Pressed primary buttons keep their primary colors in every theme and mode', () => {
+        const node = theme_root(), theme = createTheme({root: node});
+        const control = document.createElement('button'), reference = document.createElement('span');
+        control.className = 'wui-button'; control.dataset.variant = 'primary'; control.textContent = 'Run';
+        control.style.transition = 'none';
+        reference.style.color = 'var(--ui-on-accent)'; reference.style.backgroundColor = 'var(--ui-accent)';
+        node.append(control, reference);
+        try {
+            for (const id of ['default', ...named_themes.map(theme => theme.id)]) {
+                theme.setTheme(id);
+                for (const mode of ['light', 'dark']) {
+                    theme.setMode(mode, {persist: false});
+                    for (const pressed of ['false', 'true']) {
+                        control.setAttribute('aria-pressed', pressed);
+                        const actual = getComputedStyle(control), expected = getComputedStyle(reference);
+                        equal(actual.color, expected.color, `${id} ${mode} pressed=${pressed} text`);
+                        equal(actual.backgroundColor, expected.backgroundColor, `${id} ${mode} pressed=${pressed} background`);
+                    }
+                }
+            }
+        } finally { theme.destroy(); node.remove(); }
+    });
     const series_colors = colors => [colors.plot1, colors.plot2, colors.plot3, colors.plot4];
     const hue = hex => {
         const [r, g, b] = hex.slice(1).match(/../g).map(value => parseInt(value, 16) / 255);

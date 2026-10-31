@@ -345,11 +345,13 @@ if (popup) {
 }
 ```
 
-The binding preserves external stylesheet URLs and adds a source base URL for
-inline imports and assets. `ready` waits for enabled linked stylesheets and
-inline imports; a load failure rejects it. Disabled sheets do not delay it.
-Style nodes form a snapshot; recreate the binding if the source adds or removes
-stylesheets. Theme, mode, corners, density, and inline `--ui-` overrides follow
+The binding reloads external stylesheets from their original URLs and copies
+the current rules of inline stylesheets, including CSSOM edits. It adds a source
+base URL for inline imports and assets. `ready` waits for enabled linked
+stylesheets and inline imports; a load failure rejects it. Disabled sheets do
+not delay it, and links without a stylesheet URL are ignored. Styles form a
+snapshot; recreate the binding if the source changes its stylesheets.
+Theme, mode, corners, density, and inline `--ui-` overrides follow
 the source root through a mutation observer. Draw after the next animation
 frame when changing those attributes.
 

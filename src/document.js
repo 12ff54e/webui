@@ -34,10 +34,17 @@ export function bindDocumentStyles({source = globalThis.document, target,
     target.head.prepend(base); nodes.push(base);
     const pending = [];
     for (const original of source.querySelectorAll('link[rel~="stylesheet"], style')) {
+        // Links without a URL start no request and emit no load or error event.
+        if (original.tagName === 'LINK' && !original.getAttribute('href')?.trim()) continue;
         const node = original.cloneNode(true);
+        let imports = false;
         if (node.tagName === 'LINK') node.href = original.href;
-        const imports = node.tagName === 'STYLE' &&
-            [...(original.sheet?.cssRules ?? [])].some(rule => rule.type === 3);
+        else if (original.sheet) {
+            // DOM text omits edits made through insertRule() and rule.style.
+            const rules = [...original.sheet.cssRules];
+            node.textContent = rules.map(rule => rule.cssText).join('\n');
+            imports = rules.some(rule => rule.type === 3);
+        }
         if (!original.disabled && (node.tagName === 'LINK' || imports)) {
             pending.push(new Promise((resolve, reject) => {
                 const finish = error => {

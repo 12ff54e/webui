@@ -43,6 +43,55 @@ export async function test_document({test, assert, equal, root}) {
             control.mount(doc.body); node.click(); equal(clicks, 2, 'Borrowed nodes keep handlers');
         } finally { binding.destroy(); control.destroy(); theme.destroy(); source.remove(); target.remove(); }
     });
+    await test('Document readiness ignores stylesheet links without a URL', async () => {
+        const source = await frame(), target = await frame();
+        const doc = source.contentDocument, destination = target.contentDocument;
+        let binding, timer;
+        try {
+            for (const href of [null, '', ' \t\n ']) {
+                const link = doc.createElement('link'); link.rel = 'stylesheet';
+                if (href !== null) link.setAttribute('href', href);
+                doc.head.append(link);
+            }
+            binding = bindDocumentStyles({source: doc, target: destination});
+            const ready = await Promise.race([
+                binding.ready.then(() => true),
+                new Promise(resolve => { timer = setTimeout(() => resolve(false), 1000); }),
+            ]);
+            assert(ready, 'Inert links must not leave readiness pending');
+            equal(destination.querySelectorAll('link').length, 0, 'Do not turn empty URLs into document requests');
+            equal(doc.querySelectorAll('link').length, 3, 'Source links remain untouched');
+        } finally { clearTimeout(timer); binding?.destroy(); source.remove(); target.remove(); }
+    });
+    await test('Document styles snapshot CSSOM edits, imports, and relative assets', async () => {
+        const source = await frame(), target = await frame();
+        const doc = source.contentDocument, destination = target.contentDocument;
+        const base = doc.createElement('base'); base.href = new URL('../', import.meta.url).href; doc.head.append(base);
+        const style = doc.createElement('style');
+        const original_text = '.edited { color: red; } .removed { visibility: hidden; }';
+        style.textContent = original_text; doc.head.append(style);
+        style.sheet.cssRules[0].style.color = 'rgb(1, 2, 3)';
+        style.sheet.deleteRule(1);
+        style.sheet.insertRule('.inserted { padding-left: 9px; background-image: url("examples/wordmark.svg"); }', 1);
+        const imported = doc.createElement('style'); doc.head.append(imported);
+        imported.sheet.insertRule('@import url("styles/layout.css");');
+        const binding = bindDocumentStyles({source: doc, target: destination});
+        try {
+            destination.body.innerHTML = '<div class="edited inserted removed wui-header">Snapshot</div>';
+            await binding.ready;
+            const sample = destination.body.firstElementChild;
+            const computed = () => target.contentWindow.getComputedStyle(sample);
+            equal(computed().color, 'rgb(1, 2, 3)', 'Keep rule.style edits');
+            equal(computed().paddingLeft, '9px', 'Keep inserted rules');
+            equal(computed().visibility, 'visible', 'Keep deleted rules');
+            equal(computed().display, 'flex', 'Wait for CSSOM imports');
+            equal(computed().backgroundImage, `url("${new URL('examples/wordmark.svg', doc.baseURI).href}")`);
+            equal(style.textContent, original_text, 'Snapshot leaves source DOM text unchanged');
+            equal(imported.textContent, '', 'Imports inserted through CSSOM have no DOM text');
+            style.sheet.cssRules[0].style.color = 'blue';
+            equal(computed().color, 'rgb(1, 2, 3)', 'Later stylesheet edits do not change the snapshot');
+        } finally { binding.destroy(); source.remove(); target.remove(); }
+    });
     await test('Document readiness covers inline imports, disabled sheets, failure, and cancellation', async () => {
         const source = await frame(), target = await frame();
         const doc = source.contentDocument, destination = target.contentDocument;
