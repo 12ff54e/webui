@@ -4,6 +4,7 @@
 /* Plot 1–4 keep the blue, amber, green, orange-red series order, except in Carbon.
    Plot 5 is retained for existing consumers outside that four-color cycle. */
 .wui {
+    --ui-ease: cubic-bezier(.2, .7, .2, 1);
     color-scheme: light;
     --ui-background: #f7f7f1;
     --ui-surface: #fffefa;
@@ -349,6 +350,11 @@
 .wui .wui-button[data-variant='danger']:hover:enabled { background: var(--ui-danger-soft); }
 .wui .wui-button[data-tone='warning'][aria-pressed='true'] { color: var(--ui-warning); border-color: var(--ui-warning); background: var(--ui-warning-soft); }
 .wui .wui-button:disabled { opacity: .48; cursor: not-allowed; }
+.wui .wui-button[data-size='small'] { min-height: var(--ui-control-height-small); padding: var(--ui-space-1) var(--ui-space-2); font-size: var(--ui-text-small); }
+.wui .wui-button[aria-pressed='true'] { color: var(--ui-accent); border-color: var(--ui-accent); background: var(--ui-soft); }
+.wui :is(.wui-button, .wui-button-group > a)[aria-disabled='true'] { opacity: .48; cursor: not-allowed; }
+.wui .wui-button:is(a, label) { text-decoration: none; }
+.wui .wui-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .wui :is(.wui-theme-toggle, .wui-theme-picker-trigger, .wui-corner-toggle) {
     flex: 0 0 auto;
     width: var(--ui-control-height);
@@ -473,6 +479,13 @@
 .wui .wui-segmented > button:hover:enabled { color: var(--ui-accent); background: var(--ui-surface); }
 .wui .wui-segmented > button:is([aria-pressed='true'], [aria-selected='true'], .active) { color: var(--ui-accent); background: var(--ui-surface); border-color: var(--ui-line); box-shadow: var(--ui-shadow); }
 .wui .wui-segmented > button:disabled { opacity: .48; cursor: not-allowed; }
+/* Native radio groups retain form submission and browser keyboard behavior. */
+.wui fieldset.wui-segmented { min-width: 0; }
+.wui .wui-segmented > label { position: relative; padding: var(--ui-space-2); border: 1px solid transparent; border-radius: var(--ui-radius-small); color: var(--ui-muted); font-size: var(--ui-text-small); text-align: center; cursor: pointer; }
+.wui .wui-segmented > label:has(input:checked) { color: var(--ui-accent); background: var(--ui-surface); border-color: var(--ui-line); box-shadow: var(--ui-shadow); }
+.wui .wui-segmented > label:has(input:disabled) { opacity: .48; cursor: not-allowed; }
+.wui .wui-segmented > label:has(input:focus-visible) { outline: 2px solid var(--ui-accent); outline-offset: 3px; }
+.wui .wui-progress { display: block; height: 6px; accent-color: var(--ui-accent); border: 0; }
 .wui .wui-segmented[data-size='small'] > button { min-height: 28px; padding: 3px var(--ui-space-2); font-size: var(--ui-text-xs); }
 
 /* Range controls preserve the browser's native value and input events. */
@@ -520,6 +533,14 @@
 .wui .wui-dialog-title { margin: 0 0 var(--ui-space-4); font: 400 var(--ui-text-title)/var(--ui-leading-heading) var(--ui-font); }
 .wui .wui-dialog p { line-height: var(--ui-leading-copy); }
 .wui .wui-dialog-body { min-width: 0; }
+/* Compact disclosure help; consumers choose popup placement and scroll limits. */
+.wui .wui-help > summary { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-round); color: var(--ui-accent); font: var(--ui-text-control)/1 var(--ui-font); cursor: help; list-style: none; }
+.wui .wui-help > summary::-webkit-details-marker { display: none; }
+.wui .wui-help > summary:hover, .wui .wui-help[open] > summary { background: var(--ui-soft); }
+.wui .wui-help-content { padding: var(--ui-space-3) var(--ui-space-4); border: 1px solid var(--ui-line); border-radius: var(--ui-radius-small); color: var(--ui-muted); background: var(--ui-surface); font: var(--ui-text-control)/var(--ui-leading) var(--ui-serif); box-shadow: var(--ui-shadow-overlay); }
+.wui .wui-help-content p { margin: 0 0 var(--ui-space-3); }
+.wui .wui-help-content p:last-child { margin-bottom: 0; }
+.wui .wui-help-content strong { color: var(--ui-text); }
 
 /* A menu can use library-generated or borrowed native markup. */
 .wui .wui-button-group { font-size: var(--ui-text-control); position: relative; display: flex; align-items: stretch; border: 1px solid var(--ui-line); border-radius: var(--ui-radius-small); }

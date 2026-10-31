@@ -5,6 +5,7 @@ import {test_corners} from './corners-browser.js';
 import {test_controls} from './controls-browser.js';
 import {test_math} from './math-browser.js';
 import {test_layout} from './layout-browser.js';
+import {test_document} from './document-browser.js';
 
 export async function run() {
     const results = [];
@@ -17,6 +18,7 @@ export async function run() {
         try { await check(); results.push({name, pass: true}); }
         catch (error) { results.push({name, pass: false, error: error.stack}); }
     };
+    await test_document({test, assert, equal, root});
     await test('Silent updates preserve focused controls and text is not HTML', () => {
         let clicks = 0;
         const control = button({label: '<b>Run</b>', onClick: () => ++clicks}).mount(root);

@@ -324,6 +324,41 @@ and handlers. Load the stylesheet in the destination and provide a `.wui` root
 there. Document-specific application resources, including render scheduling,
 still need their own relocation policy.
 
+For a second same-origin browser window, `bindDocumentStyles({source, target,
+root})` copies the source document's styles in order and supplies a `.wui` root
+in the target. `root` defaults to `source.documentElement`; `source` defaults
+to the current document. Both documents must belong to browser windows.
+
+```js
+import {bindDocumentStyles} from './webui/src/index.js';
+
+const popup = window.open('about:blank', '', 'popup,width=1000,height=800');
+if (popup) {
+  const presentation = bindDocumentStyles({target: popup.document});
+  popup.document.body.append(retainedPanel);
+  await presentation.ready;
+  redraw();
+  await popup.document.fonts.ready;
+  redraw();
+  // When returning the panel to its original document:
+  presentation.destroy();
+}
+```
+
+The binding preserves external stylesheet URLs and adds a source base URL for
+inline imports and assets. `ready` waits for enabled linked stylesheets and
+inline imports; a load failure rejects it. Disabled sheets do not delay it.
+Style nodes form a snapshot; recreate the binding if the source adds or removes
+stylesheets. Theme, mode, corners, density, and inline `--ui-` overrides follow
+the source root through a mutation observer. Draw after the next animation
+frame when changing those attributes.
+
+`destroy()` removes copied styles, releases observers, restores the target's
+appearance attributes and inline overrides, and settles pending loads. It is
+safe to call twice. Check that the destination is still current after awaiting
+readiness or fonts. The binding leaves content, window placement, focus,
+render scheduling, and window closure to the application.
+
 Tabs accept an immutable `items` array of `{id, label, content, disabled}` entries
 at construction. IDs must be unique nonempty strings, with at least one enabled
 item. Content can be a component or a raw DOM node. Arrow keys, Home, and End
@@ -370,6 +405,14 @@ These variants keep control presentation in the library while applications
 choose their page composition.
 Native `.wui-button` toggles can use `data-tone="warning"` with
 `aria-pressed="true"` for a selected warning-colored treatment.
+Use `data-size="small"` for compact buttons. Native radio labels inside
+`.wui-segmented` retain form submission and browser arrow-key behavior; hide
+the inputs with `.wui-visually-hidden`. `.wui-help` and `.wui-help-content`
+style compact native help disclosures while the application chooses popup
+placement. `.wui-progress` styles native progress elements.
+
+`.wui-legend-key` adds a line swatch before a legend label. Set
+`--ui-legend-color` for its color and `data-line="dashed"` for a dashed line.
 
 ### Page and presentation patterns
 

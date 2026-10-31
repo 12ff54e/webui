@@ -92,6 +92,9 @@
 .wui .wui-swatch[data-kind='line'] { width: 18px; height: 0; border-radius: 0; background: none; border-top: 2px solid currentColor; }
 .wui .wui-swatch[data-line='dashed'] { border-top-style: dashed; }
 .wui .wui-swatch[data-line='dotted'] { border-top-style: dotted; }
+.wui .wui-legend-key { display: inline-flex; align-items: center; gap: var(--ui-space-2); }
+.wui .wui-legend-key::before { content: ''; width: 16px; height: 3px; flex-shrink: 0; background: var(--ui-legend-color, currentColor); }
+.wui .wui-legend-key[data-line='dashed']::before { height: 0; border-top: 2px dashed var(--ui-legend-color, currentColor); background: none; }
 .wui .wui-color-scale { font-size: var(--ui-text-small); color: var(--ui-text); }
 .wui .wui-color-scale-bar { height: 12px; border-radius: var(--ui-radius-tiny); margin-block: var(--ui-space-2) var(--ui-space-1); }
 .wui .wui-color-scale-ticks { display: flex; justify-content: space-between; color: var(--ui-muted); font-variant-numeric: tabular-nums; }
